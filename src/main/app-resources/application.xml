@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<application xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" id="tio">
+  <jobTemplates>
+    <jobTemplate id="job_tio">
+      <streamingExecutable>/application/tio/run.sh</streamingExecutable>
+      <defaultParameters>
+        <parameter id="smoothing_coefficient" title="Smoothing coefficient" abstract="threshold = 0.0001" scope="runtime">0.003</parameter>
+        <parameter id="rms_misclosure_threshold" title="RMS misclosure threshold" abstract="in rad?" scope="runtime">1.2</parameter>
+        <parameter id="weighting_res_scaling_val" title="Scaling value for weighting residuals" abstract="1 / (res**2 + val**2)" scope="runtime">2</parameter>
+        <parameter id="mask_large_residuals" title="Mask pixels of interferograms with large residuals" abstract="y: 0, n: 1" scope="runtime">1</parameter>
+      </defaultParameters>
+    </jobTemplate>
+  </jobTemplates>
+  <workflow id="tio" title="TIO" abstract="foobar">
+    <workflowVersion>1.0</workflowVersion>
+    <node id="node_tio">
+      <job id="job_tio"/>
+      <sources>
+        <source refid="file:urls">/application/list</source>
+      </sources>
+    </node>
+  </workflow>
+</application>
