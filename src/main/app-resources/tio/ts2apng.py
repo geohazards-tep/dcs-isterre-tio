@@ -1,6 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+ 
 from __future__ import print_function
 import binascii, os, sys, struct, subprocess, warnings
 warnings.simplefilter("ignore", category=RuntimeWarning)
@@ -47,7 +60,7 @@ for i in range(ds.RasterCount):
     fig.savefig("quicklook_tmp_%03d.png" % i, dpi=72)
 
 # Convert to APNG
-status = subprocess.call("ffmpeg -y -loglevel panic -framerate 4 -i 'quicklook_tmp_%%03d.png' -f apng -c:v apng %s.png" % sys.argv[1], shell=True)
+status = subprocess.call("/home/mvolat/ffmpeg -y -loglevel panic -framerate 4 -i 'quicklook_tmp_%%03d.png' -f apng -c:v apng %s.png" % sys.argv[1], shell=True)
 
 # ffmpeg do not allow (yet) to set APNG loop attribute like it does with GIF...
 # so do it the hard way: hack into the file :)
