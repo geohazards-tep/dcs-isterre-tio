@@ -101,13 +101,14 @@
             </goals>
           </execution>
           <execution>
-            <id>change perm run.sh</id>
+            <id>change perm scripts</id>
             <phase>install</phase>
             <configuration>
               <executable>chmod</executable>
               <arguments>
                 <argument>755</argument>
                 <argument>/application/tio/run.sh</argument>
+                <argument>/application/tio/ts2apng.py</argument>
               </arguments>
             </configuration>
             <goals>
@@ -168,6 +169,7 @@
                 <source>
                   <location>${basedir}/src/main/app-resources</location>
                   <includes>
+                    <include>**/*.py</include>
                     <include>**/*.sh</include>
                   </includes>
                 </source>
@@ -180,7 +182,9 @@
           </provides>
           <requires>
             <require>gdal</require>
+            <require>gdal-python</require>
             <require>lapack</require>
+            <require>python-matplotlib</require>
           </requires>
         </configuration>
       </plugin>
