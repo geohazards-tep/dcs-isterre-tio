@@ -176,21 +176,28 @@ ciop-log "INFO" "calling invers_pixel"
 ciop-log "INFO" "calling lect_depl_cumule_lin"
 depl_cumule_info=$(gdalinfo -nomd -norat -noct depl_cumule)
 /home/mvolat/timeseries/lect_depl_cumule_lin \
-	$(echo $depl_cumule_info | grep "^Size is " |tr -d , | cut -d' ' -f3) \
-	$(echo $depl_cumule_info | grep "^Size is " |tr -d , | cut -d' ' -f4) \
+	$(echo $depl_cumule_info | grep "^Size is " | tr -d , | cut -d' ' -f3) \
+	$(echo $depl_cumule_info | grep "^Size is " | tr -d , | cut -d' ' -f4) \
 	$(echo $depl_cumule_info | grep "^Band " | wc -l) \
     1 \
     1
 
+# quicklook
+ciop-log "INFO" "create quicklooks"
+/application/tio/ts2apng.py depl_cumule
+/application/tio/ts2apng.py depl_cumule_liss
+
 # compress output
-gdal_translate -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule depl_cumule.tiff
+ciop-log "INFO" "reformat output"
+gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule depl_cumule.tiff
 rm depl_cumule depl_cumule.hdr
-gdal_translate -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule_liss depl_cumule_liss.tiff
+gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule_liss depl_cumule_liss.tiff
 rm depl_cumule_liss depl_cumule_liss.hdr
 
 # clean
+ciop-log "INFO" "clean directory before tar"
 rm -Rf LN_DATA
 
-tar -C $(dirname $TMPDIR) -cJf /tmp/foobar/workdir.tar.xz $(basename $TMPDIR)
+#tar -C $(dirname $TMPDIR) -cJf /tmp/foobar/workdir.tar.xz $(basename $TMPDIR)
 
 exit 0
