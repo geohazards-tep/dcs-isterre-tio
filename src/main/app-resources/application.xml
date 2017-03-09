@@ -18,6 +18,9 @@
       <sources>
         <source refid="file:urls">/application/list</source>
       </sources>
+      <parameters>
+        <parameter id="direction">EW</parameter>
+      </parameters>
     </node>
   </workflow>
 </application>
