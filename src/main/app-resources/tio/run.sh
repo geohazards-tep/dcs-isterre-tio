@@ -19,7 +19,7 @@ clean_exit()
     # Create return message
     case "$retval" in
     $SUCCESS) msg="Processing successfully concluded";;
-	$ERR_INVERS_PIXEL) msg="invers_pixel failed";;
+	$ERR_INVERS_PIXEL) msg="Program invers_pixel failed";;
     *) msg="Unknown error";;
     esac
 
@@ -33,19 +33,28 @@ clean_exit()
 }
 trap clean_exit EXIT
 
+direction=$(ciop-getparam direction)
+
+ciop-log "INFO" "Begining $direction processing"
+
 # switch to TMPDIR
-ciop-log "INFO" "change dir to '$TMPDIR'"
+ciop-log "INFO" "Change dir to '$TMPDIR'"
 cd $TMPDIR
 
 # link inputs in TMPDIR
-ciop-log "INFO" "create links to input datasets"
+ciop-log "INFO" "Create links to input datasets"
 mkdir LN_DATA
-for f in /data/test/*; do
-    ln -s $f LN_DATA/$(basename $f)
+cd LN_DATA
+for f in /data/test/*_*_$direction; do
+	date1=$(basename $f | cut -d_ -f1)
+	date2=$(basename $f | cut -d_ -f2)
+    ln -s $f ${date1}-${date2}.r4
+	ln -s /data/test/File_Info.rsc ${date1}-${date2}.r4.rsc
 done
+cd $OLDPWD
 
 # Create input files
-ciop-log "INFO" "create invers_pixel input files"
+ciop-log "INFO" "Create invers_pixel input files"
 
 couples=$(ls -1 LN_DATA/*.r4 | sed 's/\.r4//' | xargs -L1 basename)
 dates=$(echo "$couples" | tr - \\n | sort -u)
@@ -60,80 +69,14 @@ for date in $dates; do
 done
 
 # create liste_couple file
-cat > liste_couple << EOF
-20160818 20160907 0.99436 
-20160818 20160917 0.98713 
-20160818 20160927 0.97708 
-20160818 20161106 0.91199 
-20160818 20161116 0.89035 
-20160818 20161126 0.86704 
-20160818 20161206 0.84126 
-20160818 20161216 0.81531 
-20160907 20160818 0.99436 
-20160907 20160917 0.9985 
-20160907 20160927 0.99402 
-20160907 20161106 0.94835 
-20160907 20161116 0.93062 
-20160907 20161126 0.91077 
-20160907 20161206 0.88809 
-20160907 20161216 0.86463 
-20160917 20160818 0.98713 
-20160917 20160907 0.9985 
-20160917 20160927 0.9985 
-20160917 20161106 0.96374 
-20160917 20161116 0.94835 
-20160917 20161126 0.93062 
-20160917 20161206 0.9099 
-20160917 20161216 0.88809 
-20160927 20160818 0.97708 
-20160927 20160907 0.99402 
-20160927 20160917 0.9985 
-20160927 20161106 0.9766 
-20160927 20161116 0.96374 
-20160927 20161126 0.94835 
-20160927 20161206 0.92984 
-20160927 20161216 0.9099 
-20161106 20160818 0.91199 
-20161106 20160907 0.94835 
-20161106 20160917 0.96374 
-20161106 20160927 0.9766 
-20161106 20161116 0.9985 
-20161106 20161126 0.99402 
-20161106 20161206 0.98625 
-20161106 20161216 0.97592 
-20161116 20160818 0.89035 
-20161116 20160907 0.93062 
-20161116 20160917 0.94835 
-20161116 20160927 0.96374 
-20161116 20161106 0.9985 
-20161116 20161126 0.9985 
-20161116 20161206 0.99377 
-20161116 20161216 0.98625 
-20161126 20160818 0.86704 
-20161126 20160907 0.91077 
-20161126 20160917 0.93062 
-20161126 20160927 0.94835 
-20161126 20161106 0.99402 
-20161126 20161116 0.9985 
-20161126 20161206 0.99837 
-20161126 20161216 0.99377 
-20161206 20160818 0.84126 
-20161206 20160907 0.88809 
-20161206 20160917 0.9099 
-20161206 20160927 0.92984 
-20161206 20161106 0.98625 
-20161206 20161116 0.99377 
-20161206 20161126 0.99837 
-20161206 20161216 0.9985 
-20161216 20160818 0.81531 
-20161216 20160907 0.86463 
-20161216 20160917 0.88809 
-20161216 20160927 0.9099 
-20161216 20161106 0.97592 
-20161216 20161116 0.98625 
-20161216 20161126 0.99377 
-20161216 20161206 0.9985 
-EOF
+for couple in $couples; do
+	date1=$(echo $couple|cut -d- -f1)
+	date2=$(echo $couple|cut -d- -f2)
+	date1_float=$(echo "scale=6; $(echo $date1|cut -c1-4) + ($(echo $date1|cut -c5-6)-1)/12 + ($(echo $date1|cut -c7-8)-1)/365" | bc)
+	date2_float=$(echo "scale=6; $(echo $date2|cut -c1-4) + ($(echo $date2|cut -c5-6)-1)/12 + ($(echo $date2|cut -c7-8)-1)/365" | bc)
+	coeff=$(echo "scale=6; 1 / (1 + ($date2_float-$date1_float)^2)^2" | bc)
+    printf '%s %s %f\n' $date1 $date2 $coeff >> liste_couple
+done
 
 # create invers_pixel_param file
 cat > invers_pixel_param << EOF
@@ -169,11 +112,11 @@ liste_couple
 EOF
 
 # run invers_pixel
-ciop-log "INFO" "calling invers_pixel"
+ciop-log "INFO" "Calling invers_pixel"
 /home/mvolat/timeseries/invers_pixel invers_pixel_param || exit $ERR_INVERS_PIXEL
 
 # run lect_depl_cumule_lin
-ciop-log "INFO" "calling lect_depl_cumule_lin"
+ciop-log "INFO" "Calling lect_depl_cumule_lin"
 depl_cumule_info=$(gdalinfo -nomd -norat -noct depl_cumule)
 /home/mvolat/timeseries/lect_depl_cumule_lin \
 	$(echo $depl_cumule_info | grep "^Size is " | tr -d , | cut -d' ' -f3) \
@@ -183,21 +126,47 @@ depl_cumule_info=$(gdalinfo -nomd -norat -noct depl_cumule)
     1
 
 # quicklook
-ciop-log "INFO" "create quicklooks"
+ciop-log "INFO" "Create quicklooks"
 /application/tio/ts2apng.py depl_cumule
+cat > depl_cumule.pngw <<EOF
+40.0
+0.0
+0.0
+-40.0
+799980.0
+8200000.0
+EOF
 /application/tio/ts2apng.py depl_cumule_liss
+cat > depl_cumule_liss.pngw <<EOF
+40.0
+0.0
+0.0
+-40.0
+799980.0
+8200000.0
+EOF
 
 # compress output
-ciop-log "INFO" "reformat output"
+ciop-log "INFO" "Reformat output"
 gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule depl_cumule.tiff
 rm depl_cumule depl_cumule.hdr
 gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule_liss depl_cumule_liss.tiff
 rm depl_cumule_liss depl_cumule_liss.hdr
 
 # clean
-ciop-log "INFO" "clean directory before tar"
+ciop-log "INFO" "Clean directory before archiving"
 rm -Rf LN_DATA
+rm RMS*
 
-#tar -C $(dirname $TMPDIR) -cJf /tmp/foobar/workdir.tar.xz $(basename $TMPDIR)
+# Push results
+ciop-log "INFO" "Create archive file"
+tar -C $(dirname $TMPDIR) -cjf /tmp/foobar/workdir.tar.bz2 $(basename $TMPDIR)
+
+# Push results
+ciop-log "INFO" "Publishing png files"
+ciop-publish -m $TMPDIR/depl_cumule.png
+ciop-publish -m $TMPDIR/depl_cumule.pngw
+ciop-publish -m $TMPDIR/depl_cumule_liss.png
+ciop-publish -m $TMPDIR/depl_cumule_liss.pngw
 
 exit 0
