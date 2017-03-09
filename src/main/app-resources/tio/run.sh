@@ -130,22 +130,22 @@ ciop-log "INFO" "Create quicklooks"
 /application/tio/ts2apng.py depl_cumule
 mv depl_cumule.png depl_cumule_${direction}.png
 cat > depl_cumule_${direction}.pngw <<EOF
-40.0
+0.04
 0.0
 0.0
--40.0
-799980.0
-8200000.0
+-0.04
+-72.1934900561562
+-16.262223407352135
 EOF
 /application/tio/ts2apng.py depl_cumule_liss
 mv depl_cumule_liss.png depl_cumule_liss_${direction}.png
 cat > depl_cumule_liss_${direction}.pngw <<EOF
-40.0
+0.04
 0.0
 0.0
--40.0
-799980.0
-8200000.0
+-0.04
+-72.1934900561562
+-16.262223407352135
 EOF
 
 # compress output
