@@ -128,7 +128,8 @@ depl_cumule_info=$(gdalinfo -nomd -norat -noct depl_cumule)
 # quicklook
 ciop-log "INFO" "Create quicklooks"
 /application/tio/ts2apng.py depl_cumule
-cat > depl_cumule.pngw <<EOF
+mv depl_cumule.png depl_cumule_${direction}.png
+cat > depl_cumule_${direction}.pngw <<EOF
 40.0
 0.0
 0.0
@@ -137,7 +138,8 @@ cat > depl_cumule.pngw <<EOF
 8200000.0
 EOF
 /application/tio/ts2apng.py depl_cumule_liss
-cat > depl_cumule_liss.pngw <<EOF
+mv depl_cumule_liss.png depl_cumule_liss_${direction}.png
+cat > depl_cumule_liss_${direction}.pngw <<EOF
 40.0
 0.0
 0.0
@@ -148,25 +150,25 @@ EOF
 
 # compress output
 ciop-log "INFO" "Reformat output"
-gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule depl_cumule.tiff
-rm depl_cumule depl_cumule.hdr
-gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule_liss depl_cumule_liss.tiff
-rm depl_cumule_liss depl_cumule_liss.hdr
+gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule depl_cumule_${direction}.tiff
+gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule_liss depl_cumule_liss_${direction}.tiff
 
 # clean
 ciop-log "INFO" "Clean directory before archiving"
+rm depl_cumule depl_cumule.hdr
+rm depl_cumule_liss depl_cumule_liss.hdr
 rm -Rf LN_DATA
 rm RMS*
 
 # Push results
-ciop-log "INFO" "Create archive file"
-tar -C $(dirname $TMPDIR) -cjf /tmp/foobar/workdir.tar.bz2 $(basename $TMPDIR)
+#ciop-log "INFO" "Create archive file"
+#tar -C $(dirname $TMPDIR) -cjf /tmp/foobar/workdir.tar.bz2 $(basename $TMPDIR)
 
 # Push results
 ciop-log "INFO" "Publishing png files"
-ciop-publish -m $TMPDIR/depl_cumule.png
-ciop-publish -m $TMPDIR/depl_cumule.pngw
-ciop-publish -m $TMPDIR/depl_cumule_liss.png
-ciop-publish -m $TMPDIR/depl_cumule_liss.pngw
+ciop-publish -m $TMPDIR/depl_cumule_${direction}.png
+ciop-publish -m $TMPDIR/depl_cumule_${direction}.pngw
+ciop-publish -m $TMPDIR/depl_cumule_liss_${direction}.png
+ciop-publish -m $TMPDIR/depl_cumule_liss_${direction}.pngw
 
 exit 0
