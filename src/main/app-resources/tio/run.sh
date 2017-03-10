@@ -119,9 +119,9 @@ ciop-log "INFO" "Calling invers_pixel"
 ciop-log "INFO" "Calling lect_depl_cumule_lin"
 depl_cumule_info=$(gdalinfo -nomd -norat -noct depl_cumule)
 /home/mvolat/timeseries/lect_depl_cumule_lin \
-	$(echo $depl_cumule_info | grep "^Size is " | tr -d , | cut -d' ' -f3) \
-	$(echo $depl_cumule_info | grep "^Size is " | tr -d , | cut -d' ' -f4) \
-	$(echo $depl_cumule_info | grep "^Band " | wc -l) \
+	$(printf "$depl_cumule_info" | grep "^Size is " | tr -d , | cut -d' ' -f3) \
+	$(printf "$depl_cumule_info" | grep "^Size is " | tr -d , | cut -d' ' -f4) \
+	$(printf "$depl_cumule_info" | grep "^Band " | wc -l) \
     1 \
     1
 
@@ -130,20 +130,20 @@ ciop-log "INFO" "Create quicklooks"
 /application/tio/ts2apng.py depl_cumule
 mv depl_cumule.png depl_cumule_${direction}.png
 cat > depl_cumule_${direction}.pngw <<EOF
-0.04
+0.00037368
 0.0
 0.0
--0.04
+-0.00037368
 -72.1934900561562
 -16.262223407352135
 EOF
 /application/tio/ts2apng.py depl_cumule_liss
 mv depl_cumule_liss.png depl_cumule_liss_${direction}.png
 cat > depl_cumule_liss_${direction}.pngw <<EOF
-0.04
+0.00037368
 0.0
 0.0
--0.04
+-0.00037368
 -72.1934900561562
 -16.262223407352135
 EOF
