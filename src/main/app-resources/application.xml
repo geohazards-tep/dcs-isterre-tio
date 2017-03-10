@@ -13,13 +13,22 @@
   </jobTemplates>
   <workflow id="tio" title="TIO" abstract="foobar">
     <workflowVersion>1.0</workflowVersion>
-    <node id="node_tio">
+    <node id="node_tio_ew">
       <job id="job_tio"/>
       <sources>
         <source refid="file:urls">/application/list</source>
       </sources>
       <parameters>
         <parameter id="direction">EW</parameter>
+      </parameters>
+    </node>
+    <node id="node_tio_ns">
+      <job id="job_tio"/>
+      <sources>
+        <source refid="file:urls">/application/list</source>
+      </sources>
+      <parameters>
+        <parameter id="direction">NS</parameter>
       </parameters>
     </node>
   </workflow>
