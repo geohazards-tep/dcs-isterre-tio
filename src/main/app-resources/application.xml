@@ -25,7 +25,7 @@
     <node id="node_tio_ns">
       <job id="job_tio"/>
       <sources>
-        <source refid="file:urls">/application/list</source>
+        <source scope="runtime" id="foobar" title="Optical product catalogue entry" abstract="Define the optical product. The product is passed by references to catalogue entries " refid="string:list"></source>
       </sources>
       <parameters>
         <parameter id="direction">NS</parameter>
