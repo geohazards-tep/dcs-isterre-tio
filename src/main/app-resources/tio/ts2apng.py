@@ -61,7 +61,7 @@ while(True):
     apngf.seek(chunk_len+4, 1)
 num_frames = apngf.read(4)
 apngf.seek(apngf.tell()) # do not ask why...
-apngf.write(struct.pack(">II", 0, binascii.crc32(num_frames+b"\0\0\0\0")))
+apngf.write(struct.pack(">II", 0, binascii.crc32(num_frames+b"\0\0\0\0")&0xffffffff))
 apngf.close()
 
 # Clean files
