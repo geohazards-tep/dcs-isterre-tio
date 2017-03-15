@@ -60,7 +60,6 @@ for f in $inputdir/Out_*/Px1_*_corrected.tif; do
     date1=$(basename $(dirname $f) | tr -d - | cut -d_ -f2)
     date2=$(basename $(dirname $f) | tr -d - | cut -d_ -f5)
     gdal_translate -q -of envi -ot Float32 $f ${date1}-${date2}.r4
-    rm ${date1}-${date2}.hdr
     cat > ${date1}-${date2}.r4.rsc << EOF
 WIDTH                 $f_xsize
 FILE_LENGTH           $f_ysize
@@ -131,12 +130,17 @@ liste_pair
 EOF
 
 # run invers_pixel
-#tar -C $(dirname $TMPDIR) -cf /tmp/foobar/workdir_${direction}.tar $(basename $TMPDIR)
-#exit 0
 ciop-log "INFO" "Calling invers_pixel"
 time /home/mvolat/timeseries/invers_pixel invers_pixel_param || exit $ERR_INVERS_PIXEL
-gdalinfo -stats depl_cumule &>/dev/null # force .aux.xml creation
-gdalinfo -stats depl_cumule_liss &>/dev/null # force .aux.xml creation
+
+# copy georeferencing from one input, generate aux.xml files
+/application/tio/gdalcopyproj.py LN_DATA/$(printf $pairs|head -n1).r4 depl_cumule
+printf "data ignore value = 9999" >> depl_cumule.hdr
+gdalinfo -stats depl_cumule &>/dev/null
+/application/tio/gdalcopyproj.py LN_DATA/$(printf $pairs|head -n1).r4 depl_cumule_liss
+gdalinfo -stats depl_cumule_liss &>/dev/null
+
+# Get output information
 depl_cumule_info=$(gdalinfo -nomd -norat -noct depl_cumule)
 depl_cumule_xsize=$(printf "$depl_cumule_info" | grep "^Size is " | tr -d , | cut -d' ' -f3)
 depl_cumule_ysize=$(printf "$depl_cumule_info" | grep "^Size is " | tr -d , | cut -d' ' -f4)
@@ -153,6 +157,7 @@ ciop-log "INFO" "Calling lect_depl_cumule_lin"
 
 # reformat output into tiff
 ciop-log "INFO" "Reformat output"
+
 # depl_cumule_* files, easy
 gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule depl_cumule_${direction}.tiff
 cp depl_cumule.aux.xml depl_cumule_${direction}.tiff.aux.xml
@@ -231,16 +236,11 @@ gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3"
 
 # quicklook
 ciop-log "INFO" "Create quicklooks"
-/application/tio/ts2apng.py depl_cumule
-mv depl_cumule.png depl_cumule_${direction}.png
-cat > depl_cumule_${direction}.pngw << EOF
-0.00037368
-0.0
-0.0
--0.00037368
--72.1934900561562
--16.262223407352135
-EOF
+# portal do not like UTM proj (20170315), so reproject in lonlat
+gdalwarp -t_srs '+proj=longlat +ellps=WGS84' -r cubic depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.tiff
+# create animation
+/application/tio/ts2apng.py quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.png
+rm quicklook_depl_cumule_${direction}.tiff
 
 # clean
 #ciop-log "INFO" "Clean directory before archiving"
@@ -251,11 +251,12 @@ EOF
 #rm RMSpixel_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9] RMSpixel_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].hdr
 # tar
 #ciop-log "INFO" "Create archive file"
-#tar -C $(dirname $TMPDIR) -cjf /tmp/foobar/workdir_${direction}.tar.bz2 $(basename $TMPDIR)
+#rm RMSpixel*
+#tar -C $(dirname $TMPDIR) -cf /tmp/foobar/workdir_${direction}.tar $(basename $TMPDIR)
 
 # Push results
 ciop-log "INFO" "Publishing png files"
-ciop-publish -m $TMPDIR/depl_cumule_${direction}.png
-ciop-publish -m $TMPDIR/depl_cumule_${direction}.pngw
+ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.png
+ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.pngw
 
 exit 0
