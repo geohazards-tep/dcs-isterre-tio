@@ -108,6 +108,7 @@
               <arguments>
                 <argument>755</argument>
                 <argument>/application/tio/run.sh</argument>
+                <argument>/application/tio/gdalcopyproj.py</argument>
                 <argument>/application/tio/ts2apng.py</argument>
               </arguments>
             </configuration>
