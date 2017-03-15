@@ -19,14 +19,14 @@ clean_exit()
     # Create return message
     case "$retval" in
     $SUCCESS) msg="Processing successfully concluded";;
-	$ERR_INVERS_PIXEL) msg="Program invers_pixel failed";;
+    $ERR_INVERS_PIXEL) msg="Program invers_pixel failed";;
     *) msg="Unknown error";;
     esac
 
     if [ "$retval" != "0" ]; then
         ciop-log "ERROR" "Error $retval - $msg, processing aborted"
-	else
-		ciop-log "INFO" "$msg"
+    else
+        ciop-log "INFO" "$msg"
     fi
 
     exit $retval
@@ -34,6 +34,11 @@ clean_exit()
 trap clean_exit EXIT
 
 direction=$(ciop-getparam direction)
+if [ "x$direction" = "xEW" ]; then
+    direction_micmac="Px1"
+else
+    direction_micmac="Px2"
+fi
 
 ciop-log "INFO" "Begining $direction processing"
 
@@ -42,16 +47,30 @@ ciop-log "INFO" "Change dir to '$TMPDIR'"
 cd $TMPDIR
 
 # link inputs in TMPDIR
-ciop-log "INFO" "Create links to input datasets"
+ciop-log "INFO" "Reformat input dataset"
 mkdir LN_DATA
 cd LN_DATA
-for f in /data/test/*_*_$direction; do
-	date1=$(basename $f | cut -d_ -f1)
-	date2=$(basename $f | cut -d_ -f2)
-    ln -s $f ${date1}-${date2}.r4
-	ln -s /data/test/File_Info.rsc ${date1}-${date2}.r4.rsc
+inputdir=/data/test_maca_tiff
+for f in $inputdir/Out_*/Px1_*_corrected.tif; do
+    f_info=$(gdalinfo -nomd -norat -noct $f)
+    f_xsize=$(printf "$f_info" | grep "^Size is " | tr -d , | cut -d' ' -f3)
+    f_ysize=$(printf "$f_info" | grep "^Size is " | tr -d , | cut -d' ' -f4)
+    f_xmax=$(echo "scale=0; $f_xsize-1" | bc)
+    f_ymax=$(echo "scale=0; $f_ysize-1" | bc)
+    date1=$(basename $(dirname $f) | tr -d - | cut -d_ -f2)
+    date2=$(basename $(dirname $f) | tr -d - | cut -d_ -f5)
+    gdal_translate -q -of envi -ot Float32 $f ${date1}-${date2}.r4
+    rm ${date1}-${date2}.hdr
+    cat > ${date1}-${date2}.r4.rsc << EOF
+WIDTH                 $f_xsize
+FILE_LENGTH           $f_ysize
+XMIN                  0
+XMAX                  $f_xmax
+YMIN                  0
+YMAX                  $f_ymax
+EOF
 done
-cd $OLDPWD
+cd ..
 
 # Create input files
 ciop-log "INFO" "Create invers_pixel input files"
@@ -63,18 +82,18 @@ dates=$(echo "$pairs" | tr - \\n | sort -u)
 date0=$(echo $dates | head -n1)
 date0_float=$(echo "scale=6; $(echo $date0|cut -c1-4) + ($(echo $date0|cut -c5-6)-1)/12 + ($(echo $date0|cut -c7-8)-1)/365" | bc)
 for date in $dates; do
-	date_float=$(echo "scale=6; $(echo $date|cut -c1-4) + ($(echo $date|cut -c5-6)-1)/12 + ($(echo $date|cut -c7-8)-1)/365" | bc)
-	date_diff=$(echo "scale=6; $date_float - $date0_float" | bc)
-	printf '%d %f %f %d\n' $date $date_float $date_diff 0 >> liste_image_inv
+    date_float=$(echo "scale=6; $(echo $date|cut -c1-4) + ($(echo $date|cut -c5-6)-1)/12 + ($(echo $date|cut -c7-8)-1)/365" | bc)
+    date_diff=$(echo "scale=6; $date_float - $date0_float" | bc)
+    printf '%d %f %f %d\n' $date $date_float $date_diff 0 >> liste_image_inv
 done
 
 # create liste_pair file
 for pair in $pairs; do
-	date1=$(echo $pair|cut -d- -f1)
-	date2=$(echo $pair|cut -d- -f2)
-	date1_float=$(echo "scale=6; $(echo $date1|cut -c1-4) + ($(echo $date1|cut -c5-6)-1)/12 + ($(echo $date1|cut -c7-8)-1)/365" | bc)
-	date2_float=$(echo "scale=6; $(echo $date2|cut -c1-4) + ($(echo $date2|cut -c5-6)-1)/12 + ($(echo $date2|cut -c7-8)-1)/365" | bc)
-	coeff=$(echo "scale=6; 1 / (1 + ($date2_float-$date1_float)^2)^2" | bc)
+    date1=$(echo $pair|cut -d- -f1)
+    date2=$(echo $pair|cut -d- -f2)
+    date1_float=$(echo "scale=6; $(echo $date1|cut -c1-4) + ($(echo $date1|cut -c5-6)-1)/12 + ($(echo $date1|cut -c7-8)-1)/365" | bc)
+    date2_float=$(echo "scale=6; $(echo $date2|cut -c1-4) + ($(echo $date2|cut -c5-6)-1)/12 + ($(echo $date2|cut -c7-8)-1)/365" | bc)
+    coeff=$(echo "scale=6; 1 / (1 + ($date2_float-$date1_float)^2)^2" | bc)
     printf '%s %s %f\n' $date1 $date2 $coeff >> liste_pair
 done
 
@@ -112,8 +131,10 @@ liste_pair
 EOF
 
 # run invers_pixel
+#tar -C $(dirname $TMPDIR) -cf /tmp/foobar/workdir_${direction}.tar $(basename $TMPDIR)
+#exit 0
 ciop-log "INFO" "Calling invers_pixel"
-/home/mvolat/timeseries/invers_pixel invers_pixel_param || exit $ERR_INVERS_PIXEL
+time /home/mvolat/timeseries/invers_pixel invers_pixel_param || exit $ERR_INVERS_PIXEL
 gdalinfo -stats depl_cumule &>/dev/null # force .aux.xml creation
 gdalinfo -stats depl_cumule_liss &>/dev/null # force .aux.xml creation
 depl_cumule_info=$(gdalinfo -nomd -norat -noct depl_cumule)
@@ -124,9 +145,9 @@ depl_cumule_bands=$(printf "$depl_cumule_info" | grep "^Band " | wc -l)
 # run lect_depl_cumule_lin
 ciop-log "INFO" "Calling lect_depl_cumule_lin"
 /home/mvolat/timeseries/lect_depl_cumule_lin \
-	$depl_cumule_xsize \
-	$depl_cumule_ysize \
-	$depl_cumule_bands \
+    $depl_cumule_xsize \
+    $depl_cumule_ysize \
+    $depl_cumule_bands \
     1 \
     1
 
@@ -135,16 +156,14 @@ ciop-log "INFO" "Reformat output"
 # depl_cumule_* files, easy
 gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule depl_cumule_${direction}.tiff
 cp depl_cumule.aux.xml depl_cumule_${direction}.tiff.aux.xml
-gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule_liss depl_cumule_liss_${direction}.tiff
-cp depl_cumule_liss.aux.xml depl_cumule_liss_${direction}.tiff.aux.xml
 
 # create vrt for RMSpixel files per date
 cat > RMSpixel_dates.vrt << EOF
 <VRTDataset rasterXSize="$depl_cumule_xsize" rasterYSize="$depl_cumule_ysize">
 EOF
 for date in $dates; do
-	f=RMSpixel_$date
-	cat > ${f}.hdr << EOF
+    f=RMSpixel_$date
+    cat > ${f}.hdr << EOF
 ENVI
 samples = $depl_cumule_xsize
 lines = $depl_cumule_ysize
@@ -154,7 +173,7 @@ data type = 4
 interleave = bip
 byte order = 0
 EOF
-	cat >> RMSpixel_dates.vrt << EOF
+    cat >> RMSpixel_dates.vrt << EOF
   <VRTRasterBand dataType="Float32">
     <SimpleSource>
       <SourceFilename relativeToVRT="1">$f</SourceFilename>
@@ -178,10 +197,10 @@ cat > RMSpixel_pairs.vrt << EOF
 <VRTDataset rasterXSize="$depl_cumule_xsize" rasterYSize="$depl_cumule_ysize">
 EOF
 for pair in $pairs; do
-	date1=$(echo $pair|cut -d- -f1)
-	date2=$(echo $pair|cut -d- -f2)
-	f=RMSpixel_${date1}_${date2}
-	cat > ${f}.hdr << EOF
+    date1=$(echo $pair|cut -d- -f1)
+    date2=$(echo $pair|cut -d- -f2)
+    f=RMSpixel_${date1}_${date2}
+    cat > ${f}.hdr << EOF
 ENVI
 samples = $depl_cumule_xsize
 lines = $depl_cumule_ysize
@@ -191,7 +210,7 @@ data type = 4
 interleave = bip
 byte order = 0
 EOF
-	cat >> RMSpixel_pairs.vrt << EOF
+    cat >> RMSpixel_pairs.vrt << EOF
   <VRTRasterBand dataType="Float32">
     <SimpleSource>
       <SourceFilename relativeToVRT="1">$f</SourceFilename>
@@ -214,17 +233,7 @@ gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3"
 ciop-log "INFO" "Create quicklooks"
 /application/tio/ts2apng.py depl_cumule
 mv depl_cumule.png depl_cumule_${direction}.png
-cat > depl_cumule_${direction}.pngw <<EOF
-0.00037368
-0.0
-0.0
--0.00037368
--72.1934900561562
--16.262223407352135
-EOF
-/application/tio/ts2apng.py depl_cumule_liss
-mv depl_cumule_liss.png depl_cumule_liss_${direction}.png
-cat > depl_cumule_liss_${direction}.pngw <<EOF
+cat > depl_cumule_${direction}.pngw << EOF
 0.00037368
 0.0
 0.0
@@ -248,7 +257,5 @@ EOF
 ciop-log "INFO" "Publishing png files"
 ciop-publish -m $TMPDIR/depl_cumule_${direction}.png
 ciop-publish -m $TMPDIR/depl_cumule_${direction}.pngw
-ciop-publish -m $TMPDIR/depl_cumule_liss_${direction}.png
-ciop-publish -m $TMPDIR/depl_cumule_liss_${direction}.pngw
 
 exit 0
