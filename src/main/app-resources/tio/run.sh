@@ -158,8 +158,11 @@ ciop-log "INFO" "Calling lect_depl_cumule_lin"
 # reformat output into tiff
 ciop-log "INFO" "Reformat output"
 
-# depl_cumule_* files, easy
-gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" depl_cumule depl_cumule_${direction}.tiff
+# depl_cumule files, easy
+gdal_translate -q \
+        -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" \
+        depl_cumule \
+        depl_cumule_${direction}.tiff
 cp depl_cumule.aux.xml depl_cumule_${direction}.tiff.aux.xml
 
 # create vrt for RMSpixel files per date
@@ -195,7 +198,10 @@ cat >> RMSpixel_dates.vrt << EOF
 </VRTDataset>
 EOF
 # pack all RMSpixel files per date into a single tiff
-gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" RMSpixel_dates.vrt RMSpixel_dates_${direction}.tiff
+gdal_translate -q \
+        -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" \
+        RMSpixel_dates.vrt \
+        RMSpixel_dates_${direction}.tiff
 
 # create vrt for RMSpixel files per pair
 cat > RMSpixel_pairs.vrt << EOF
@@ -232,15 +238,21 @@ cat >> RMSpixel_pairs.vrt << EOF
 </VRTDataset>
 EOF
 # pack all RMSpixel files per date into a single tiff
-gdal_translate -q -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" RMSpixel_pairs.vrt RMSpixel_pairs_${direction}.tiff
+gdal_translate -q \
+        -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" \
+        RMSpixel_pairs.vrt \
+        RMSpixel_pairs_${direction}.tiff
 
 # quicklook
 ciop-log "INFO" "Create quicklooks"
 # portal do not like UTM proj (20170315), so reproject in lonlat
-gdalwarp -t_srs '+proj=longlat +ellps=WGS84' -r cubic depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.tiff
+gdalwarp -q -t_srs '+proj=longlat +ellps=WGS84' -r cubic \
+        depl_cumule_${direction}.tiff \
+        quicklook_depl_cumule_${direction}.tiff
+cp depl_cumule_${direction}.tiff.aux.xml quicklook_depl_cumule_${direction}.tiff.aux.xml
 # create animation
 /application/tio/ts2apng.py quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.png
-rm quicklook_depl_cumule_${direction}.tiff
+rm quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.tiff.aux.xml
 
 # clean
 #ciop-log "INFO" "Clean directory before archiving"
@@ -253,6 +265,7 @@ rm quicklook_depl_cumule_${direction}.tiff
 #ciop-log "INFO" "Create archive file"
 #rm RMSpixel*
 #tar -C $(dirname $TMPDIR) -cf /tmp/foobar/workdir_${direction}.tar $(basename $TMPDIR)
+#exit 0
 
 # Push results
 ciop-log "INFO" "Publishing png files"

@@ -34,19 +34,25 @@ for i in range(ds.RasterCount):
 downscale = 0.25
 # TODO: would be cool to generate extra images to smoothe transitions
 # Use a matplotlib figure to colorize
-fig = plt.figure(frameon=False)
-fig.set_size_inches(ds.RasterXSize*downscale/72,
-                    ds.RasterYSize*downscale/72)
-ax = plt.Axes(fig, [0., 0., 1., 1.])
-ax.set_axis_off()
-fig.add_axes(ax)
 for i in range(ds.RasterCount):
+    fig = plt.figure(frameon=False)
+    fig.set_size_inches(ds.RasterXSize*downscale/72,
+                        ds.RasterYSize*downscale/72)
+    ax = plt.Axes(fig, [0., 0., 1., 1.])
+    ax.set_axis_off()
+    fig.add_axes(ax)
     band = ds.GetRasterBand(i+1)
+    band_name = ds.GetMetadata()["Band_%d"%(i+1)]
     data = band.ReadAsArray(0, 0,
                             ds.RasterXSize, ds.RasterYSize,
                             ds.RasterXSize*downscale, ds.RasterYSize*downscale)
     data[data == band.GetNoDataValue()] = np.nan
-    plt.imshow(data, cmap="jet", interpolation="bilinear", vmin=dsmin, vmax=dsmax)
+    ax.imshow(data, cmap="jet", interpolation="bilinear", vmin=dsmin, vmax=dsmax)
+    ax.text(0.99, 0.01,
+            band_name,
+            verticalalignment='bottom', horizontalalignment='right',
+            transform=ax.transAxes,
+            fontsize=28)
     fig.savefig("quicklook_tmp_%03d.png" % i, dpi=72)
 
 # Convert to APNG
