@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PATH=/application/tio:$PATH
+
 # do not let errors run away
 set -e
 
@@ -134,10 +136,10 @@ ciop-log "INFO" "Calling invers_pixel"
 time /home/mvolat/timeseries/invers_pixel invers_pixel_param || exit $ERR_INVERS_PIXEL
 
 # copy georeferencing from one input, generate aux.xml files
-/application/tio/gdalcopyproj.py LN_DATA/$(printf $pairs|head -n1).r4 depl_cumule
+gdalcopyproj.py LN_DATA/$(printf $pairs|head -n1).r4 depl_cumule
 printf "data ignore value = 9999" >> depl_cumule.hdr
 gdalinfo -stats depl_cumule &>/dev/null
-/application/tio/gdalcopyproj.py LN_DATA/$(printf $pairs|head -n1).r4 depl_cumule_liss
+gdalcopyproj.py LN_DATA/$(printf $pairs|head -n1).r4 depl_cumule_liss
 gdalinfo -stats depl_cumule_liss &>/dev/null
 
 # Get output information
@@ -251,7 +253,7 @@ gdalwarp -q -t_srs '+proj=longlat +ellps=WGS84' -r cubic \
         quicklook_depl_cumule_${direction}.tiff
 cp depl_cumule_${direction}.tiff.aux.xml quicklook_depl_cumule_${direction}.tiff.aux.xml
 # create animation
-/application/tio/ts2apng.py quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.png
+ts2apng.py quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.png
 rm quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.tiff.aux.xml
 
 # clean
