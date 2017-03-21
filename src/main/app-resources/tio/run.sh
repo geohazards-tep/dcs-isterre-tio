@@ -52,7 +52,7 @@ cd $TMPDIR
 ciop-log "INFO" "Reformat input dataset"
 mkdir LN_DATA
 cd LN_DATA
-inputdir=/data/test_maca_tiff
+inputdir=/data/test_maca
 for f in $inputdir/Out_*/Px1_*_corrected.tif; do
     date1=$(basename $(dirname $f) | tr -d - | cut -d_ -f2)
     date2=$(basename $(dirname $f) | tr -d - | cut -d_ -f5)
@@ -133,7 +133,7 @@ EOF
 
 # run invers_pixel
 ciop-log "INFO" "Calling invers_pixel"
-time /home/mvolat/timeseries/invers_pixel invers_pixel_param || exit $ERR_INVERS_PIXEL
+time /home/mvolat/nsbas-invers_optic/bin/invers_pixel invers_pixel_param || exit $ERR_INVERS_PIXEL
 
 # copy georeferencing from one input, generate aux.xml files
 gdalcopyproj.py LN_DATA/$(printf $pairs|head -n1).r4 depl_cumule
@@ -150,7 +150,7 @@ depl_cumule_bands=$(printf "$depl_cumule_info" | grep "^Band " | wc -l)
 
 # run lect_depl_cumule_lin
 ciop-log "INFO" "Calling lect_depl_cumule_lin"
-/home/mvolat/timeseries/lect_depl_cumule_lin \
+/home/mvolat/nsbas-invers_optic/bin/lect_depl_cumule_lin \
     $depl_cumule_xsize \
     $depl_cumule_ysize \
     $depl_cumule_bands \
