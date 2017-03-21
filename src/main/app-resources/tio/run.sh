@@ -54,21 +54,21 @@ mkdir LN_DATA
 cd LN_DATA
 inputdir=/data/test_maca_tiff
 for f in $inputdir/Out_*/Px1_*_corrected.tif; do
-    f_info=$(gdalinfo -nomd -norat -noct $f)
-    f_xsize=$(printf "$f_info" | grep "^Size is " | tr -d , | cut -d' ' -f3)
-    f_ysize=$(printf "$f_info" | grep "^Size is " | tr -d , | cut -d' ' -f4)
-    f_xmax=$(echo "scale=0; $f_xsize-1" | bc)
-    f_ymax=$(echo "scale=0; $f_ysize-1" | bc)
     date1=$(basename $(dirname $f) | tr -d - | cut -d_ -f2)
     date2=$(basename $(dirname $f) | tr -d - | cut -d_ -f5)
     gdal_translate -q -of envi -ot Float32 $f ${date1}-${date2}.r4
+    info=$(gdalinfo -nomd -norat -noct ${date1}-${date2}.r4)
+    xsize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f3)
+    ysize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f4)
+    xmax=$(echo "scale=0; $xsize-1" | bc)
+    ymax=$(echo "scale=0; $ysize-1" | bc)
     cat > ${date1}-${date2}.r4.rsc << EOF
-WIDTH                 $f_xsize
-FILE_LENGTH           $f_ysize
+WIDTH                 $xsize
+FILE_LENGTH           $ysize
 XMIN                  0
-XMAX                  $f_xmax
+XMAX                  $xmax
 YMIN                  0
-YMAX                  $f_ymax
+YMAX                  $ymax
 EOF
 done
 cd ..
