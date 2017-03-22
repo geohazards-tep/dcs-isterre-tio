@@ -29,6 +29,9 @@ for i in range(ds.RasterCount):
     bmin, bmax, bmean, bstddev = band.GetStatistics(0, 1)
     # Update dsmin/dsmax
     dsmin, dsmax = min(dsmin, bmin), max(dsmax, bmax)
+# Recenter min/max on zero
+dsmax = max(abs(dsmin), abs(dsmax))
+dsmin = -dsmax
 
 # Create the png files
 downscale = 0.25
@@ -49,12 +52,16 @@ for i in range(ds.RasterCount):
                             ds.RasterXSize, ds.RasterYSize,
                             ds.RasterXSize*downscale, ds.RasterYSize*downscale)
     data[data == band.GetNoDataValue()] = np.nan
-    ax.imshow(data, cmap="jet", interpolation="bilinear", vmin=dsmin, vmax=dsmax)
-    ax.text(0.99, 0.01,
-            band_name,
-            verticalalignment='bottom', horizontalalignment='right',
-            transform=ax.transAxes,
-            fontsize=28)
+    im = ax.imshow(data,
+                   cmap="jet", interpolation="bilinear",
+                   vmin=dsmin, vmax=dsmax)
+    txt = ax.text(0.99, 0.01,
+                  band_name,
+                  verticalalignment='bottom', horizontalalignment='right',
+                  transform=ax.transAxes,
+                  fontsize=28)
+    cax = fig.add_axes([0.01, 0.25, 0.05, 0.5])
+    fig.colorbar(im, cax=cax)
     fig.savefig("quicklook_tmp_%03d.png" % i, dpi=72)
 def clean_pngs():
     for i in range(ds.RasterCount):
@@ -95,7 +102,7 @@ if os.path.splitext(sys.argv[2])[1] == ".png":
 
 # World file, if possible
 gt = ds.GetGeoTransform()
-if gt is not None and gt != (0,1,0,0,0,1):
+if os.path.splitext(sys.argv[2])[1] == ".png" and gt is not None and gt != (0,1,0,0,0,1):
     # Apply downscale
     gt = list(gt)
     for i in [1, 2, 4, 5]:
