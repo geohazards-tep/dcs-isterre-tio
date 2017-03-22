@@ -42,7 +42,9 @@ for i in range(ds.RasterCount):
     ax.set_axis_off()
     fig.add_axes(ax)
     band = ds.GetRasterBand(i+1)
-    band_name = ds.GetMetadata()["Band_%d"%(i+1)]
+    band_name = "Band_%d"%(i+1)
+    if band_name in ds.GetMetadata():
+        band_name = ds.GetMetadata()["Band_%d"%(i+1)]
     data = band.ReadAsArray(0, 0,
                             ds.RasterXSize, ds.RasterYSize,
                             ds.RasterXSize*downscale, ds.RasterYSize*downscale)
