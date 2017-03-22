@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import os, sys, struct, subprocess, warnings, zlib
+import atexit, os, sys, struct, subprocess, warnings, zlib
 warnings.simplefilter("ignore", category=RuntimeWarning)
 
 import numpy as np
@@ -56,28 +56,42 @@ for i in range(ds.RasterCount):
             transform=ax.transAxes,
             fontsize=28)
     fig.savefig("quicklook_tmp_%03d.png" % i, dpi=72)
+def clean_pngs():
+    for i in range(ds.RasterCount):
+        os.unlink("quicklook_tmp_%03d.png" % i)
+atexit.register(clean_pngs)
 
 # Convert to APNG
-status = subprocess.call("ffmpeg -y -loglevel panic -framerate 4 -i 'quicklook_tmp_%%03d.png' -f apng -c:v apng %s" % sys.argv[2], shell=True)
+codec_args = None
+if os.path.splitext(sys.argv[2])[1] == ".png":
+    codec_args = "-f apng -c:v apng"
+elif os.path.splitext(sys.argv[2])[1] == ".gif":
+    codec_args = "-f gif -c:v gif -loop 0"
+elif os.path.splitext(sys.argv[2])[1] == ".mp4":
+    codec_args = "-r 30 -c:v libx264 -preset slow -crf 22"
+else:
+    print("Unsupported output format")
+    exit(1)
+status = subprocess.call("ffmpeg -y -loglevel panic -framerate 4 -i 'quicklook_tmp_%%03d.png' %s %s" % (codec_args, sys.argv[2]), shell=True)
+if status != 0:
+    print("ffmpeg failed")
+    exit(1)
 
-# ffmpeg do not allow (yet) to set APNG loop attribute like it does with GIF...
-# so do it the hard way: hack into the file :)
-apngf = open(sys.argv[2], "r+b")
-apngf.read(8)
-while(True):
-    chunk_len = struct.unpack(">I", apngf.read(4))[0]
-    chunk_type = apngf.read(4)
-    if chunk_type == b"acTL":
-        break
-    apngf.seek(chunk_len+4, 1)
-num_frames = apngf.read(4)
-apngf.seek(apngf.tell()) # do not ask why...
-apngf.write(struct.pack(">II", 0, zlib.crc32(num_frames+b"\0\0\0\0")&0xffffffff))
-apngf.close()
-
-# Clean files
-for i in range(ds.RasterCount):
-    os.unlink("quicklook_tmp_%03d.png" % i)
+if os.path.splitext(sys.argv[2])[1] == ".png":
+    # ffmpeg do not allow (yet) to set APNG loop attribute like it does with
+    # GIF... so do it the hard way: hack into the file :)
+    apngf = open(sys.argv[2], "r+b")
+    apngf.read(8)
+    while(True):
+        chunk_len = struct.unpack(">I", apngf.read(4))[0]
+        chunk_type = apngf.read(4)
+        if chunk_type == b"acTL":
+            break
+        apngf.seek(chunk_len+4, 1)
+    num_frames = apngf.read(4)
+    apngf.seek(apngf.tell()) # do not ask why...
+    apngf.write(struct.pack(">II", 0, zlib.crc32(num_frames+b"\0\0\0\0")&0xffffffff))
+    apngf.close()
 
 # World file, if possible
 gt = ds.GetGeoTransform()
