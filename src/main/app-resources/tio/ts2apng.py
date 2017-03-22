@@ -56,7 +56,7 @@ for i in range(ds.RasterCount):
     fig.savefig("quicklook_tmp_%03d.png" % i, dpi=72)
 
 # Convert to APNG
-status = subprocess.call("/home/mvolat/ffmpeg -y -loglevel panic -framerate 4 -i 'quicklook_tmp_%%03d.png' -f apng -c:v apng %s" % sys.argv[2], shell=True)
+status = subprocess.call("ffmpeg -y -loglevel panic -framerate 4 -i 'quicklook_tmp_%%03d.png' -f apng -c:v apng %s" % sys.argv[2], shell=True)
 
 # ffmpeg do not allow (yet) to set APNG loop attribute like it does with GIF...
 # so do it the hard way: hack into the file :)
