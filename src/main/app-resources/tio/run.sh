@@ -1,6 +1,8 @@
 #!/bin/bash
 
-PATH=/application/tio:$PATH
+export PATH=/application/tio:/usr/local/gdal-t2/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/gdal-t2/lib:$LD_LIBRARY_PATH
+export GDAL_DATA=/usr/local/gdal-t2/share/gdal
 
 # do not let errors run away
 set -e
@@ -52,11 +54,11 @@ cd $TMPDIR
 ciop-log "INFO" "Reformat input dataset"
 mkdir LN_DATA
 cd LN_DATA
-inputdir=/data/test_maca
+inputdir=/data/test_colca
 for f in $inputdir/Out_*/Px1_*_corrected.tif; do
     date1=$(basename $(dirname $f) | tr -d - | cut -d_ -f2)
     date2=$(basename $(dirname $f) | tr -d - | cut -d_ -f5)
-    gdal_translate -q -of envi -ot Float32 $f ${date1}-${date2}.r4
+    gdal_translate -q -of envi -ot Float32 -srcwin 3000 0 2000 2000 $f ${date1}-${date2}.r4
     info=$(gdalinfo -nomd -norat -noct ${date1}-${date2}.r4)
     xsize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f3)
     ysize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f4)
@@ -248,23 +250,19 @@ gdal_translate -q \
 # quicklook
 ciop-log "INFO" "Create quicklooks"
 # portal do not like UTM proj (20170315), so reproject in lonlat
-gdalwarp -q -t_srs '+proj=longlat +ellps=WGS84' -r cubic \
+gdalwarp -q -t_srs 'EPSG:3857' -r cubic \
         depl_cumule_${direction}.tiff \
         quicklook_depl_cumule_${direction}.tiff
 cp depl_cumule_${direction}.tiff.aux.xml quicklook_depl_cumule_${direction}.tiff.aux.xml
 # create animation
 ts2apng.py quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.png
-rm quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.tiff.aux.xml
+#rm quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.tiff.aux.xml
 
 # clean
 #ciop-log "INFO" "Clean directory before archiving"
 #rm -Rf LN_DATA
 #rm depl_cumule depl_cumule.hdr depl_cumule.aux.xml
 #rm depl_cumule_liss depl_cumule_liss.hdr depl_cumule_liss.aux.xml
-#rm RMSpixel_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9] RMSpixel_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].hdr
-#rm RMSpixel_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9] RMSpixel_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].hdr
-# tar
-#ciop-log "INFO" "Create archive file"
 #rm RMSpixel*
 #tar -C $(dirname $TMPDIR) -cf /tmp/foobar/workdir_${direction}.tar $(basename $TMPDIR)
 #exit 0

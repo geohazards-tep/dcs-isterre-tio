@@ -182,7 +182,7 @@
             <provide>${project.artifactId}</provide>
           </provides>
           <requires>
-            <require>gdal</require>
+            <require>gdal-t2</require>
             <require>gdal-python</require>
             <require>lapack</require>
             <require>python-matplotlib</require>
