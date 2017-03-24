@@ -250,8 +250,8 @@ gdal_translate -q \
 
 # quicklook
 ciop-log "INFO" "Create quicklooks"
-# portal do not like UTM proj (20170315), so reproject in lonlat
-gdalwarp -q -t_srs "+proj=longlat +ellps=WGS8" -r cubic \
+# image must be reprojected in wgs84 (even if display will be webmercator)
+gdalwarp -q -t_srs "+proj=longlat +ellps=WGS84" -r cubic \
         depl_cumule_${direction}.tiff \
         quicklook_depl_cumule_${direction}.tiff
 cp depl_cumule_${direction}.tiff.aux.xml quicklook_depl_cumule_${direction}.tiff.aux.xml
