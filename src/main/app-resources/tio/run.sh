@@ -163,9 +163,9 @@ depl_cumule_bands=$(printf "$depl_cumule_info" | grep "^Band " | wc -l)
 #    1
 
 # reformat output into tiff
-ciop-log "INFO" "Reformat output"
 
 # depl_cumule files, easy
+ciop-log "INFO" "Reformat output: convert depl_cumule to tiff"
 gdal_translate -q \
         -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" \
         depl_cumule \
@@ -173,6 +173,7 @@ gdal_translate -q \
 cp depl_cumule.aux.xml depl_cumule_${direction}.tiff.aux.xml
 
 # create vrt for RMSpixel files per date
+ciop-log "INFO" "Reformat output: create VRT file for RMSpixel per date"
 cat > RMSpixel_dates.vrt << EOF
 <VRTDataset rasterXSize="$depl_cumule_xsize" rasterYSize="$depl_cumule_ysize">
 EOF
@@ -205,12 +206,14 @@ cat >> RMSpixel_dates.vrt << EOF
 </VRTDataset>
 EOF
 # pack all RMSpixel files per date into a single tiff
+ciop-log "INFO" "Reformat output: merge RMSpixel per date files into tiff"
 gdal_translate -q \
         -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" \
         RMSpixel_dates.vrt \
         RMSpixel_dates_${direction}.tiff
 
 # create vrt for RMSpixel files per pair
+ciop-log "INFO" "Reformat output: create VRT file for RMSpixel per pair"
 cat > RMSpixel_pairs.vrt << EOF
 <VRTDataset rasterXSize="$depl_cumule_xsize" rasterYSize="$depl_cumule_ysize">
 EOF
@@ -245,6 +248,7 @@ cat >> RMSpixel_pairs.vrt << EOF
 </VRTDataset>
 EOF
 # pack all RMSpixel files per date into a single tiff
+ciop-log "INFO" "Reformat output: merge RMSpixel per pair files into tiff"
 gdal_translate -q \
         -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" \
         RMSpixel_pairs.vrt \
