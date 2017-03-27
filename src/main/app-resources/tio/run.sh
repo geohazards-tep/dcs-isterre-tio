@@ -59,7 +59,7 @@ inputdir=/data/test_colca
 for f in $inputdir/Out_*/Px1_*_corrected.tif; do
     date1=$(basename $(dirname $f) | tr -d - | cut -d_ -f2)
     date2=$(basename $(dirname $f) | tr -d - | cut -d_ -f5)
-    gdal_translate -q -of envi -ot Float32 -srcwin 3000 0 2000 2000 $f ${date1}-${date2}.r4
+    gdal_translate -q -of envi -ot Float32 $f ${date1}-${date2}.r4
     info=$(gdalinfo -nomd -norat -noct ${date1}-${date2}.r4)
     xsize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f3)
     ysize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f4)
@@ -152,13 +152,13 @@ depl_cumule_ysize=$(printf "$depl_cumule_info" | grep "^Size is " | tr -d , | cu
 depl_cumule_bands=$(printf "$depl_cumule_info" | grep "^Band " | wc -l)
 
 # run lect_depl_cumule_lin
-ciop-log "INFO" "Calling lect_depl_cumule_lin"
-/home/mvolat/nsbas-invers_optic/bin/lect_depl_cumule_lin \
-    $depl_cumule_xsize \
-    $depl_cumule_ysize \
-    $depl_cumule_bands \
-    1 \
-    1
+#ciop-log "INFO" "Calling lect_depl_cumule_lin"
+#/home/mvolat/nsbas-invers_optic/bin/lect_depl_cumule_lin \
+#    $depl_cumule_xsize \
+#    $depl_cumule_ysize \
+#    $depl_cumule_bands \
+#    1 \
+#    1
 
 # reformat output into tiff
 ciop-log "INFO" "Reformat output"
