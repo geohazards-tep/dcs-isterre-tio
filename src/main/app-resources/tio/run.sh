@@ -118,6 +118,8 @@ liste_image_inv
 liste_pair
 1   % interferogram format (RMG : 0; R4 :1) (date1-date2_pre_inv.unw or date1-date2.r4)
 3100.   %  include interferograms with bperp lower than maximal baseline
+1   %Weight input interferograms by coherence or correlation maps ? (y:0,n:1)
+1   %coherence file format (RMG : 0; R4 :1) (date1-date2.cor or date1-date2-CC.r4)
 1   %   minimal number of interferams using each image
 1     % interferograms weighting so that the weight per image is the same (y=0;n=1)
 0.7 % maximum fraction of discarded interferograms
