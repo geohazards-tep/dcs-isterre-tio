@@ -4,7 +4,7 @@
     <jobTemplate id="job_tio">
       <streamingExecutable>/application/tio/run.sh</streamingExecutable>
       <defaultParameters>
-        <parameter id="foobar" scope="runtime" title="Optical product catalogue entry" abstract="Define the optical product. The product is passed by references to catalogue entries"></parameter>
+        <parameter id="input" scope="runtime" title="Optical product catalogue entry" abstract="Define the optical product. The product is passed by references to catalogue entries"></parameter>
         <parameter id="smoothing_coefficient" title="Smoothing coefficient" abstract="threshold = 0.0001" scope="runtime">0.003</parameter>
         <parameter id="rms_misclosure_threshold" title="RMS misclosure threshold" abstract="in rad?" scope="runtime">1.2</parameter>
         <parameter id="weighting_res_scaling_val" title="Scaling value for weighting residuals" abstract="1 / (res**2 + val**2)" scope="runtime">2</parameter>
@@ -12,7 +12,7 @@
       </defaultParameters>
     </jobTemplate>
   </jobTemplates>
-  <workflow id="tio" title="TIO" abstract="foobar">
+  <workflow id="tio" title="TIO" abstract="Ground displacement time serie analysis tool">
     <workflowVersion>1.0</workflowVersion>
     <node id="node_tio_ew">
       <job id="job_tio"/>
