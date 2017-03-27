@@ -10,6 +10,9 @@
         <parameter id="weighting_res_scaling_val" title="Scaling value for weighting residuals" abstract="1 / (res**2 + val**2)" scope="runtime">2</parameter>
         <parameter id="mask_large_residuals" title="Mask pixels of interferograms with large residuals" abstract="y: 0, n: 1" scope="runtime">1</parameter>
       </defaultParameters>
+      <defaultJobconf>
+        <property id="mapred.task.timeout">18000000</property>
+      </defaultJobconf>
     </jobTemplate>
   </jobTemplates>
   <workflow id="tio" title="TIO" abstract="Ground displacement time serie analysis tool">
