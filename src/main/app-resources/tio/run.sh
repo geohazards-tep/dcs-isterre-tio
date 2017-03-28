@@ -144,23 +144,16 @@ time /home/mvolat/nsbas-invers_optic/bin/invers_pixel invers_pixel_param || exit
 gdalcopyproj.py LN_DATA/$(printf $pairs|head -n1).r4 depl_cumule
 printf "data ignore value = 9999" >> depl_cumule.hdr
 gdalinfo -stats depl_cumule &>/dev/null
-gdalcopyproj.py LN_DATA/$(printf $pairs|head -n1).r4 depl_cumule_liss
-gdalinfo -stats depl_cumule_liss &>/dev/null
+
+# make some space for that is following
+ciop-log "INFO" "Clean up LN_DATA"
+rm -Rf LN_DATA
 
 # Get output information
 depl_cumule_info=$(gdalinfo -nomd -norat -noct depl_cumule)
 depl_cumule_xsize=$(printf "$depl_cumule_info" | grep "^Size is " | tr -d , | cut -d' ' -f3)
 depl_cumule_ysize=$(printf "$depl_cumule_info" | grep "^Size is " | tr -d , | cut -d' ' -f4)
 depl_cumule_bands=$(printf "$depl_cumule_info" | grep "^Band " | wc -l)
-
-# run lect_depl_cumule_lin
-#ciop-log "INFO" "Calling lect_depl_cumule_lin"
-#/home/mvolat/nsbas-invers_optic/bin/lect_depl_cumule_lin \
-#    $depl_cumule_xsize \
-#    $depl_cumule_ysize \
-#    $depl_cumule_bands \
-#    1 \
-#    1
 
 # reformat output into tiff
 
