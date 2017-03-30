@@ -107,6 +107,8 @@
               <executable>chmod</executable>
               <arguments>
                 <argument>755</argument>
+                <argument>/application/aux/run.sh</argument>
+                <argument>/application/micmac/run.sh</argument>
                 <argument>/application/tio/run.sh</argument>
                 <argument>/application/tio/ffmpeg</argument>
                 <argument>/application/tio/gdalcopyproj.py</argument>

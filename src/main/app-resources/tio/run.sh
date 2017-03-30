@@ -59,7 +59,7 @@ inputdir=/data/test_colca
 for f in $inputdir/Out_*/Px1_*_corrected.tif; do
     date1=$(basename $(dirname $f) | tr -d - | cut -d_ -f2)
     date2=$(basename $(dirname $f) | tr -d - | cut -d_ -f5)
-    gdal_translate -q -of envi -ot Float32 $f ${date1}-${date2}.r4
+    gdal_translate -q -of envi -ot Float32 -srcwin 0 3000 2000 2000 $f ${date1}-${date2}.r4
     info=$(gdalinfo -nomd -norat -noct ${date1}-${date2}.r4)
     xsize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f3)
     ysize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f4)
@@ -256,7 +256,7 @@ gdalwarp -q -t_srs "+proj=longlat +ellps=WGS84" -r cubic \
 cp depl_cumule_${direction}.tiff.aux.xml quicklook_depl_cumule_${direction}.tiff.aux.xml
 # create animation
 ts2apng.py quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.png
-#rm quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.tiff.aux.xml
+rm quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.tiff.aux.xml
 
 # clean
 #ciop-log "INFO" "Clean directory before archiving"
@@ -269,7 +269,7 @@ ts2apng.py quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direc
 
 # Push results
 ciop-log "INFO" "Publishing png files"
-ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.png
-ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.pngw
+#ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.png
+#ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.pngw
 
 exit 0

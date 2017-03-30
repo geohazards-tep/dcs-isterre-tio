@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <application xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" id="tio">
   <jobTemplates>
+    <jobTemplate id="job_aux">
+      <streamingExecutable>/application/aux/run.sh</streamingExecutable>
+      <defaultJobconf>
+        <property id="ciop.job.max.tasks">1</property>
+      </defaultJobconf>
+    </jobTemplate>
+    <jobTemplate id="job_micmac">
+      <streamingExecutable>/application/micmac/run.sh</streamingExecutable>
+    </jobTemplate>
     <jobTemplate id="job_tio">
       <streamingExecutable>/application/tio/run.sh</streamingExecutable>
       <defaultParameters>
-        <parameter id="input" scope="runtime" title="Optical product catalogue entry" abstract="Define the optical product. The product is passed by references to catalogue entries"></parameter>
         <parameter id="smoothing_coefficient" title="Smoothing coefficient" abstract="threshold = 0.0001" scope="runtime">0.003</parameter>
         <parameter id="rms_misclosure_threshold" title="RMS misclosure threshold" abstract="in rad?" scope="runtime">1.2</parameter>
         <parameter id="weighting_res_scaling_val" title="Scaling value for weighting residuals" abstract="1 / (res**2 + val**2)" scope="runtime">2</parameter>
@@ -17,10 +25,22 @@
   </jobTemplates>
   <workflow id="tio" title="TIO" abstract="Ground displacement time serie analysis tool">
     <workflowVersion>1.0</workflowVersion>
+    <node id="node_aux">
+      <job id="job_aux"/>
+      <sources>
+        <source id="input_ref" abstract="References to catalogue entries" title="References to catalogue entries" refid="string:list" scope="runtime">https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160718T095327_R108_V20160604T103739_20160604T103739,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160714T193230_R108_V20160714T103723_20160714T103723,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160724T181320_R108_V20160724T103229_20160724T103229,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160805T220539_R108_V20160803T103724_20160803T103724</source>
+      </sources>
+    </node>
+    <node id="node_micmac">
+      <job id="job_micmac"/>
+      <sources>
+        <source refid="wf:node">node_aux</source>
+      </sources>
+    </node>
     <node id="node_tio_ew">
       <job id="job_tio"/>
       <sources>
-        <source refid="file:urls">/data/list</source>
+        <source refid="wf:node">node_micmac</source>
       </sources>
       <parameters>
         <parameter id="direction">EW</parameter>
@@ -29,7 +49,7 @@
     <node id="node_tio_ns">
       <job id="job_tio"/>
       <sources>
-        <source refid="file:urls">/data/list</source>
+        <source refid="wf:node">node_micmac</source>
       </sources>
       <parameters>
         <parameter id="direction">NS</parameter>
