@@ -55,8 +55,12 @@ cd $TMPDIR
 mkdir LN_DATA
 cd LN_DATA
 while read line; do
-    if [ -z "$(echo $line | grep ${direction_micmac}_)" ]; then
-        continue
+    if [ -n "$(echo $line | grep ${direction_micmac}_Num6_DeZoom1_LeChantier)" ]; then
+        suf="" # Displacement map
+    elif [ -n "$(echo $line | grep Correl_LeChantier_Num_5.tif)" ]; then
+        suf="-CC" # Correlation
+    else
+        continue # Ignore
     fi
 
     ciop-log "INFO" "Fetch '$line'"
@@ -67,13 +71,13 @@ while read line; do
     ciop-log "INFO" "Reformat '$f'"
     date1=$(basename $(dirname $f) | tr -d - | cut -d_ -f2)
     date2=$(basename $(dirname $f) | tr -d - | cut -d_ -f5)
-    gdal_translate -q -of envi -ot Float32 $f ${date1}-${date2}.r4
-    info=$(gdalinfo -nomd -norat -noct ${date1}-${date2}.r4)
+    gdal_translate -q -of envi -ot Float32 $f ${date1}-${date2}${suf}.r4
+    info=$(gdalinfo -nomd -norat -noct ${date1}-${date2}${suf}.r4)
     xsize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f3)
     ysize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f4)
     xmax=$(echo "scale=0; $xsize-1" | bc)
     ymax=$(echo "scale=0; $ysize-1" | bc)
-    cat > ${date1}-${date2}.r4.rsc << EOF
+    cat > ${date1}-${date2}${suf}.r4.rsc << EOF
 WIDTH                 $xsize
 FILE_LENGTH           $ysize
 XMIN                  0
@@ -128,7 +132,7 @@ liste_image_inv
 liste_pair
 1   % interferogram format (RMG : 0; R4 :1) (date1-date2_pre_inv.unw or date1-date2.r4)
 3100.   %  include interferograms with bperp lower than maximal baseline
-1   %Weight input interferograms by coherence or correlation maps ? (y:0,n:1)
+0   %Weight input interferograms by coherence or correlation maps ? (y:0,n:1)
 1   %coherence file format (RMG : 0; R4 :1) (date1-date2.cor or date1-date2-CC.r4)
 1   %   minimal number of interferams using each image
 1     % interferograms weighting so that the weight per image is the same (y=0;n=1)

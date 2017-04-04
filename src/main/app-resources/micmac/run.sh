@@ -66,7 +66,7 @@ while read ref; do
 
         # TODO: check that ROI is in product
         ciop-log "INFO" "Cropping $safedir to ROI"
-        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B03.jp2 $date.tiff
+        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B03.jp2 ${date}.tiff
     else
         exit $ERR_SENSOR_NOT_SUPPORTED
     fi
@@ -87,7 +87,7 @@ for date1 in $dates; do
 
         ciop-log "INFO" "Processing $date1-$date2 pair"
 
-        /home/mvolat/micmac/bin/mm3d MM2DPosSism $date1.tiff $date2.tiff SzW=9 Reg=0.2
+        /home/mvolat/micmac/bin/mm3d MM2DPosSism ${date1}.tiff ${date2}.tiff SzW=9 Reg=0.2
 
         ciop-log "INFO" "Prepare publish directory for $date1-$date2 pair"
         date1_dashed="$(echo $date1|cut -c1-4)-$(echo $date1|cut -c5-6)-$(echo $date1|cut -c7-8)"
@@ -95,7 +95,7 @@ for date1 in $dates; do
         outdir="$TMPDIR/Out_${date1_dashed}_${date1_dashed}_B03_${date2_dashed}_${date2_dashed}_B03"
         mkdir $outdir
         for f in Px1_Num6_DeZoom1_LeChantier.tif Px2_Num6_DeZoom1_LeChantier.tif; do
-            /application/tio/gdalcopyproj.py $date1.tiff MEC/$f
+            /application/tio/gdalcopyproj.py ${date1}.tiff MEC/$f
             mv MEC/$f $outdir
 		done
 
