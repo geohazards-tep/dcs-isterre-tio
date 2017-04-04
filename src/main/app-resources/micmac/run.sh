@@ -71,11 +71,13 @@ while read ref; do
         exit $ERR_SENSOR_NOT_SUPPORTED
     fi
 
-	rm -Rf $img_dl
+    if [ -z "$(gdalinfo -stats ${date}.tiff | grep 'STATISTICS_MEAN=0$')" ]; then
+        dates="$dates $date"
+    fi
 
-	dates="$date\n$dates"
+	rm -Rf $img_dl
 done
-dates=$(echo $dates | sort -nu | tr '\\n' ' ')
+dates=$(echo $dates | tr ' ' '\\n' | sort -nu | tr '\\n' ' ')
 ciop-log "INFO" "Available acquisitions: $dates"
 
 # Create correlations maps
