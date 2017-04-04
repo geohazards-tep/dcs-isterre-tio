@@ -59,7 +59,7 @@ for i in range(ds.RasterCount):
                   band_name,
                   verticalalignment='bottom', horizontalalignment='right',
                   transform=ax.transAxes,
-                  fontsize=28)
+                  fontsize=14)
     cax = fig.add_axes([0.01, 0.25, 0.05, 0.5])
     fig.colorbar(im, cax=cax)
     fig.savefig("quicklook_tmp_%03d.png" % i, dpi=72)

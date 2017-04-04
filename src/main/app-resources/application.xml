@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <application xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" id="tio">
   <jobTemplates>
-    <jobTemplate id="job_aux">
-      <streamingExecutable>/application/aux/run.sh</streamingExecutable>
-      <defaultJobconf>
-        <property id="ciop.job.max.tasks">1</property>
-      </defaultJobconf>
-    </jobTemplate>
     <jobTemplate id="job_micmac">
       <streamingExecutable>/application/micmac/run.sh</streamingExecutable>
+      <defaultParameters>
+        <parameter id="roi" title="Region of interest" abstract="Must be inside products" scope="runtime" type="BoundingBoxData">5.668,44.936,5.71,44.964</parameter>
+      </defaultParameters>
       <defaultJobconf>
         <property id="ciop.job.max.tasks">1</property>
+        <property id="mapred.task.timeout">18000000</property>
       </defaultJobconf>
     </jobTemplate>
     <jobTemplate id="job_tio">
@@ -22,22 +20,17 @@
         <parameter id="mask_large_residuals" title="Mask pixels of interferograms with large residuals" abstract="y: 0, n: 1" scope="runtime">1</parameter>
       </defaultParameters>
       <defaultJobconf>
+        <property id="ciop.job.max.tasks">1</property>
         <property id="mapred.task.timeout">18000000</property>
       </defaultJobconf>
     </jobTemplate>
   </jobTemplates>
   <workflow id="tio" title="TIO" abstract="Ground displacement time serie analysis tool">
     <workflowVersion>1.0</workflowVersion>
-    <node id="node_aux">
-      <job id="job_aux"/>
-      <sources>
-        <source id="input_ref" abstract="References to catalogue entries" title="References to catalogue entries" refid="string:list" scope="runtime">https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160516T015231_R108_V20160515T103028_20160515T103028,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160718T061224_R008_V20160717T104026_20160717T104833,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160707T174208_R008_V20160707T104025_20160707T104025</source>
-      </sources>
-    </node>
     <node id="node_micmac">
       <job id="job_micmac"/>
       <sources>
-        <source refid="wf:node">node_aux</source>
+        <source id="input_ref" abstract="References to catalogue entries" title="References to catalogue entries" refid="string:list" scope="runtime">https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160508T222121_R008_V20160508T104027_20160508T104027,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160516T015231_R108_V20160515T103028_20160515T103028,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160707T174208_R008_V20160707T104025_20160707T104025,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160718T061224_R008_V20160717T104026_20160717T104833,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160727T181937_R008_V20160727T104250_20160727T104250,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160811T034521_R008_V20160806T104032_20160806T104026,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160816T231309_R008_V20160816T104022_20160816T104025,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160827T194742_R008_V20160826T104022_20160826T104023</source>
       </sources>
     </node>
     <node id="node_tio_ew">

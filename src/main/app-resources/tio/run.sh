@@ -51,15 +51,23 @@ ciop-log "INFO" "Begining $direction processing"
 ciop-log "INFO" "Change dir to '$TMPDIR'"
 cd $TMPDIR
 
-# link inputs in TMPDIR
-ciop-log "INFO" "Reformat input dataset"
+# Fetch & reformat correl maps
 mkdir LN_DATA
 cd LN_DATA
-inputdir=/data/test_colca
-for f in $inputdir/Out_*/Px1_*_corrected.tif; do
+while read line; do
+    if [ -z "$(echo $line | grep ${direction_micmac}_)" ]; then
+        continue
+    fi
+
+    ciop-log "INFO" "Fetch '$line'"
+    fdir=$(basename $(dirname $line))
+    mkdir -p $fdir
+    f=$(ciop-copy -o $PWD/$fdir $line)
+
+    ciop-log "INFO" "Reformat '$f'"
     date1=$(basename $(dirname $f) | tr -d - | cut -d_ -f2)
     date2=$(basename $(dirname $f) | tr -d - | cut -d_ -f5)
-    gdal_translate -q -of envi -ot Float32 -srcwin 0 3000 2000 2000 $f ${date1}-${date2}.r4
+    gdal_translate -q -of envi -ot Float32 $f ${date1}-${date2}.r4
     info=$(gdalinfo -nomd -norat -noct ${date1}-${date2}.r4)
     xsize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f3)
     ysize=$(printf "$info" | grep "^Size is " | tr -d , | cut -d' ' -f4)
@@ -73,6 +81,8 @@ XMAX                  $xmax
 YMIN                  0
 YMAX                  $ymax
 EOF
+
+	rm -Rf $fdir
 done
 cd ..
 
@@ -267,9 +277,9 @@ rm quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.ti
 #tar -C $(dirname $TMPDIR) -cf /tmp/foobar/workdir_${direction}.tar $(basename $TMPDIR)
 #exit 0
 
-# Push results
+# Publish results
 ciop-log "INFO" "Publishing png files"
-#ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.png
-#ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.pngw
+ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.png
+ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.pngw
 
 exit 0
