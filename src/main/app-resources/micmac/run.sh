@@ -9,7 +9,8 @@ export GDAL_DATA=/usr/local/gdal-t2/share/gdal
 
 # define the exit codes
 SUCCESS=0
-ERR_SENSOR_NOT_SUPPORTED=100
+ERR_CATALOG=100
+ERR_SENSOR_NOT_SUPPORTED=101
 
 # source the ciop functions (e.g. ciop-log)
 source $ciop_job_include
@@ -23,6 +24,7 @@ clean_exit()
     # Create return message
     case "$retval" in
     $SUCCESS) msg="Processing successfully concluded";;
+    $ERR_CATALOG) msg="Could not retrieve reference from catalog";;
     $ERR_SENSOR_NOT_SUPPORTED) msg="This sensor is not supported yet";;
     *) msg="Unknown error";;
     esac
@@ -57,6 +59,9 @@ while read ref; do
     date=$(opensearch-client $ref startdate | cut -c 1-10 | tr -d "-")
     img_url=$(opensearch-client $ref enclosure)
     img_dl=$(ciop-copy -o $TMPDIR $img_url)
+    if [ -z "$date" -o -z "$img_dl" ]; then
+      exit $ERR_CATALOG;
+    fi
 
     # What happens here: we crop/mosaic the inputs
     # into the desired frame. There may be overwrite.
@@ -71,7 +76,8 @@ while read ref; do
         exit $ERR_SENSOR_NOT_SUPPORTED
     fi
 
-    if [ -z "$(gdalinfo -stats ${date}.tiff | grep 'STATISTICS_MEAN=0$')" ]; then
+    mean=$(gdalinfo -stats ${date}.tiff | grep 'STATISTICS_MEAN=' | cut -d= -f2)
+    if [ $(echo "$mean > 0 && $mean < 2000"|bc) -eq 1 ]; then
         dates="$dates $date"
     fi
 
@@ -82,8 +88,12 @@ ciop-log "INFO" "Available acquisitions: $dates"
 
 # Create correlations maps
 for date1 in $dates; do
+    count=0
     for date2 in $dates; do
         if [ "$date1" -ge "$date2" ]; then
+            continue
+        fi
+        if [ $count -ge 2 ]; then
             continue
         fi
 
@@ -106,5 +116,6 @@ for date1 in $dates; do
 
         ciop-log "INFO" "Clean after $date1-$date2 pair"
         rm -Rf MEC Pyram $outdir
+        count=$(expr $count + 1)
     done
 done
