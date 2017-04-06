@@ -98,8 +98,7 @@ for date1 in $dates; do
         fi
 
         ciop-log "INFO" "Processing $date1-$date2 pair"
-
-        /home/mvolat/micmac/bin/mm3d MM2DPosSism ${date1}.tiff ${date2}.tiff SzW=9 Reg=0.2
+        /home/mvolat/micmac/bin/mm3d MICMAC /application/micmac/MM-PostSism.xml WorkDir=./ +DirMEC=MEC/ +Im1=${date1}.tiff +Im2=${date2}.tiff +Masq= +SzW=9 +RegulBase=0.200000 +Inc=2.000000 +SsResolOpt=4 +Px1Moy=0.000000 +Px2Moy=0.000000 +ZoomInit=1 +UseDequant=true
 
         ciop-log "INFO" "Prepare publish directory for $date1-$date2 pair"
         date1_dashed="$(echo $date1|cut -c1-4)-$(echo $date1|cut -c5-6)-$(echo $date1|cut -c7-8)"
