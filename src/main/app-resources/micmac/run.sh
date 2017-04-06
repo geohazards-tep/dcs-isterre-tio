@@ -3,7 +3,7 @@
 # do not let errors run away
 set -e
 
-export PATH=/application/tio:/usr/local/gdal-t2/bin:$PATH
+export PATH=/application/gdal:/usr/local/gdal-t2/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/gdal-t2/lib:$LD_LIBRARY_PATH
 export GDAL_DATA=/usr/local/gdal-t2/share/gdal
 
@@ -107,7 +107,7 @@ for date1 in $dates; do
         outdir="$TMPDIR/Out_${date1_dashed}_${date1_dashed}_B03_${date2_dashed}_${date2_dashed}_B03"
         mkdir $outdir
         for f in Px1_Num6_DeZoom1_LeChantier.tif Px2_Num6_DeZoom1_LeChantier.tif; do
-            /application/tio/gdalcopyproj.py ${date1}.tiff MEC/$f
+            gdalcopyproj.py ${date1}.tiff MEC/$f
             mv MEC/$f $outdir
 		done
 

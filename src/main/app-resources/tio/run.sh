@@ -1,7 +1,6 @@
 #!/bin/bash
 
-export PATH=/application/tio:/usr/local/gdal-t2/bin:$PATH
-export PATH=$PATH:/home/mvolat
+export PATH=/application/tio:/application/gdal:/usr/local/gdal-t2/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/gdal-t2/lib:$LD_LIBRARY_PATH
 export GDAL_DATA=/usr/local/gdal-t2/share/gdal
 
