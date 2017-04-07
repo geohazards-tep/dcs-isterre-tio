@@ -98,7 +98,7 @@ for date1 in $dates; do
         fi
 
         ciop-log "INFO" "Processing $date1-$date2 pair"
-        /home/mvolat/micmac/bin/mm3d MICMAC /application/micmac/MM-PostSism.xml WorkDir=./ +DirMEC=MEC/ +Im1=${date1}.tiff +Im2=${date2}.tiff +Masq= +SzW=9 +RegulBase=0.200000 +Inc=2.000000 +SsResolOpt=4 +Px1Moy=0.000000 +Px2Moy=0.000000 +ZoomInit=1 +UseDequant=true
+        /home/mvolat/micmac/bin/mm3d MICMAC /application/micmac/ParamSatDequant.xml WorkDir=./ +DirMEC=MEC/ +Im1=${date1}.tiff +Im2=${date2}.tiff +Masq=
 
         ciop-log "INFO" "Prepare publish directory for $date1-$date2 pair"
         date1_dashed="$(echo $date1|cut -c1-4)-$(echo $date1|cut -c5-6)-$(echo $date1|cut -c7-8)"
@@ -106,15 +106,15 @@ for date1 in $dates; do
         outdir="$TMPDIR/Out_${date1_dashed}_${date1_dashed}_B03_${date2_dashed}_${date2_dashed}_B03"
         mkdir $outdir
         for f in Px1_Num6_DeZoom1_LeChantier.tif Px2_Num6_DeZoom1_LeChantier.tif; do
-            gdalcopyproj.py ${date1}.tiff MEC/$f
-            mv MEC/$f $outdir
-		done
+            mv MECSat/$f $outdir/$f
+            gdalcopyproj.py ${date1}.tiff $outdir/$f
+        done
 
         ciop-log "INFO" "Publish $(basename $outdir)"
         ciop-publish -r $outdir
 
         ciop-log "INFO" "Clean after $date1-$date2 pair"
-        rm -Rf MEC Pyram $outdir
+        rm -Rf MECSat PyramSat $outdir
         count=$(expr $count + 1)
     done
 done
