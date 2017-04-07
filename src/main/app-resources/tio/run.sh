@@ -54,7 +54,7 @@ cd $TMPDIR
 mkdir LN_DATA
 cd LN_DATA
 while read line; do
-    if [ -n "$(echo $line | grep ${direction_micmac}_Num6_DeZoom1_LeChantier)" ]; then
+    if [ -n "$(echo $line | grep ${direction_micmac}_Num5_DeZoom1_LeChantier)" ]; then
         suf="" # Displacement map
     elif [ -n "$(echo $line | grep Correl_LeChantier_Num_5.tif)" ]; then
         suf="-CC" # Correlation

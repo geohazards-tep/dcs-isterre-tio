@@ -105,8 +105,8 @@ for date1 in $dates; do
         date2_dashed="$(echo $date2|cut -c1-4)-$(echo $date2|cut -c5-6)-$(echo $date2|cut -c7-8)"
         outdir="$TMPDIR/Out_${date1_dashed}_${date1_dashed}_B03_${date2_dashed}_${date2_dashed}_B03"
         mkdir $outdir
-        for f in Px1_Num6_DeZoom1_LeChantier.tif Px2_Num6_DeZoom1_LeChantier.tif; do
-            mv MECSat/$f $outdir/$f
+        for f in Px1_Num5_DeZoom1_LeChantier.tif Px2_Num5_DeZoom1_LeChantier.tif; do
+            gdal_calc.py --calc 'A*0.1' --outfile $outdir/$f -A MECSat/$f --type Float32
             gdalcopyproj.py ${date1}.tiff $outdir/$f
         done
 
