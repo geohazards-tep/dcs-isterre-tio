@@ -34,7 +34,7 @@ dsmax = max(abs(dsmin), abs(dsmax))
 dsmin = -dsmax
 
 # Create the png files
-downscale = 0.25
+downscale = 0.5
 # TODO: would be cool to generate extra images to smoothe transitions
 # Use a matplotlib figure to colorize
 for i in range(ds.RasterCount):
