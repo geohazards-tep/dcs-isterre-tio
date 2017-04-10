@@ -32,6 +32,9 @@
       <sources>
         <source id="input_ref" abstract="References to catalogue entries" title="References to catalogue entries" refid="string:list" scope="runtime"/>
       </sources>
+      <parameters>
+        <parameter id="cloud_thres" title="Cloud level threshold" abstract="If a cloud mask has a mean value over threshold, it is ignored" scope="runtime">1200</parameter>
+      </parameters>
     </node>
     <node id="node_tio_ew">
       <job id="job_tio"/>

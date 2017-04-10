@@ -43,6 +43,9 @@ trap clean_exit EXIT
 roi=$(ciop-getparam roi | tr "," " ")
 ciop-log "INFO" "ROI is '$roi'"
 
+# Cloud level threshold
+cloud_thres=$(ciop-getparam cloud_thres)
+
 # switch to TMPDIR
 ciop-log "INFO" "Change dir to '$TMPDIR'"
 cd $TMPDIR
@@ -79,7 +82,7 @@ while read ref; do
 
     img_mean=$(gdalinfo -stats ${date}.tiff | grep 'STATISTICS_MEAN=' | cut -d= -f2)
     cloud_mean=$(gdalinfo -stats ${date}_clouds.tiff | grep 'STATISTICS_MEAN=' | cut -d= -f2)
-    if [ $(echo "$img_mean > 0 && $cloud_mean < 1200"|bc) -eq 1 ]; then
+    if [ $(echo "$img_mean > 0 && $cloud_mean < $cloud_thres"|bc) -eq 1 ]; then
         dates="$dates $date"
     fi
 
