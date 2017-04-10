@@ -151,7 +151,7 @@ EOF
 
 # run invers_pixel
 ciop-log "INFO" "Calling invers_pixel"
-time /home/mvolat/nsbas-invers_optic/bin/invers_pixel invers_pixel_param || exit $ERR_INVERS_PIXEL
+/home/mvolat/nsbas-invers_optic/bin/invers_pixel invers_pixel_param || exit $ERR_INVERS_PIXEL
 
 # copy georeferencing from one input, generate aux.xml files
 gdalcopyproj.py LN_DATA/$(printf $pairs|head -n1).r4 depl_cumule
@@ -271,16 +271,14 @@ cp depl_cumule_${direction}.tiff.aux.xml quicklook_depl_cumule_${direction}.tiff
 ts2apng.py quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.png
 rm quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.tiff.aux.xml
 
-# clean
-#ciop-log "INFO" "Clean directory before archiving"
-#rm -Rf LN_DATA
-#rm depl_cumule depl_cumule.hdr depl_cumule.aux.xml
-#rm depl_cumule_liss depl_cumule_liss.hdr depl_cumule_liss.aux.xml
-#rm RMSpixel*
-#tar -C $(dirname $TMPDIR) -cf /tmp/foobar/workdir_${direction}.tar $(basename $TMPDIR)
-#exit 0
-
 # Publish results
+ciop-log "INFO" "Publishing result files"
+ciop-publish -m $TMPDIR/depl_cumule_${direction}.tiff
+ciop-publish -m $TMPDIR/depl_cumule_${direction}.tiff.aux.xml
+ciop-publish -m $TMPDIR/RMSpixel_dates_${direction}.tiff
+#ciop-publish -m $TMPDIR/RMSpixel_dates_${direction}.tiff.aux.xml
+ciop-publish -m $TMPDIR/RMSpixel_pairs_${direction}.tiff
+#ciop-publish -m $TMPDIR/RMSpixel_pairs_${direction}.tiff.aux.xml
 ciop-log "INFO" "Publishing png files"
 ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.png
 ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.pngw
