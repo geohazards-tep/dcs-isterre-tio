@@ -3,5 +3,10 @@ dcs-isterre-tio
 
 The TIO service combine correlation maps provided by the MPIC service
 and perform a time serie analysis using the methods described in 
-[Bontemps & al].
+Bontemps & al[1].
 
+[1]
+"Inversion of deformation fields time-series from optical images, and
+application to the long term kinematics of slow-moving landslides in Peru"
+Noélie Bontemps and Pascal Lacroix and Marie-Pierre Doin
+2017
