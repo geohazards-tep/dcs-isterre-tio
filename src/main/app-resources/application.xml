@@ -30,7 +30,7 @@
     <node id="node_micmac">
       <job id="job_micmac"/>
       <sources>
-        <source id="input_ref" abstract="References to catalogue entries" title="References to catalogue entries" refid="string:list" scope="runtime">https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160508T222121_R008_V20160508T104027_20160508T104027,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160516T015231_R108_V20160515T103028_20160515T103028,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160707T174208_R008_V20160707T104025_20160707T104025,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160718T061224_R008_V20160717T104026_20160717T104833,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160727T181937_R008_V20160727T104250_20160727T104250,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160811T034521_R008_V20160806T104032_20160806T104026,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160816T231309_R008_V20160816T104022_20160816T104025,https://catalog.terradue.com//sentinel2/search?format=json&amp;uid=S2A_OPER_PRD_MSIL1C_PDMC_20160827T194742_R008_V20160826T104022_20160826T104023</source>
+        <source id="input_ref" abstract="References to catalogue entries" title="References to catalogue entries" refid="string:list" scope="runtime"/>
       </sources>
     </node>
     <node id="node_tio_ew">
