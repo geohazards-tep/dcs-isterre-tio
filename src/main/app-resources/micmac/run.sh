@@ -57,10 +57,10 @@ while read ref; do
 	# Fetch image
 	ciop-log "INFO" "Process reference '$ref'"
     date=$(opensearch-client $ref startdate | cut -c 1-10 | tr -d "-")
-    img_url=$(opensearch-client $ref enclosure)
-    img_dl=$(ciop-copy -o $TMPDIR $img_url)
+    img_dl=$(ciop-copy -o $TMPDIR $(opensearch-client $ref enclosure) || printf "")
     if [ -z "$date" -o -z "$img_dl" ]; then
-      exit $ERR_CATALOG;
+      #exit $ERR_CATALOG;
+      continue
     fi
 
     # What happens here: we crop/mosaic the inputs
