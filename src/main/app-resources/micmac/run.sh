@@ -57,10 +57,10 @@ while read ref; do
 	# Fetch image
 	ciop-log "INFO" "Process reference '$ref'"
     date=$(opensearch-client $ref startdate | cut -c 1-10 | tr -d "-")
-    img_dl=$(ciop-copy -o $TMPDIR $(opensearch-client $ref enclosure) || printf "")
+    img_dl=$(ciop-copy -o $TMPDIR $(opensearch-client $ref enclosure))
     if [ -z "$date" -o -z "$img_dl" ]; then
-      #exit $ERR_CATALOG;
-      continue
+        #exit $ERR_CATALOG;
+        continue
     fi
 
     # What happens here: we crop/mosaic the inputs
@@ -72,12 +72,14 @@ while read ref; do
         # TODO: check that ROI is in product
         ciop-log "INFO" "Cropping $safedir to ROI"
         gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B03.jp2 ${date}.tiff
+        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B09.jp2 ${date}_clouds.tiff
     else
         exit $ERR_SENSOR_NOT_SUPPORTED
     fi
 
-    mean=$(gdalinfo -stats ${date}.tiff | grep 'STATISTICS_MEAN=' | cut -d= -f2)
-    if [ $(echo "$mean > 0 && $mean < 2000"|bc) -eq 1 ]; then
+    img_mean=$(gdalinfo -stats ${date}.tiff | grep 'STATISTICS_MEAN=' | cut -d= -f2)
+    cloud_mean=$(gdalinfo -stats ${date}_clouds.tiff | grep 'STATISTICS_MEAN=' | cut -d= -f2)
+    if [ $(echo "$img_mean > 0 && $cloud_mean < 1200"|bc) -eq 1 ]; then
         dates="$dates $date"
     fi
 
@@ -106,7 +108,7 @@ for date1 in $dates; do
         outdir="$TMPDIR/Out_${date1_dashed}_${date1_dashed}_B03_${date2_dashed}_${date2_dashed}_B03"
         mkdir $outdir
         for f in Px1_Num5_DeZoom1_LeChantier.tif Px2_Num5_DeZoom1_LeChantier.tif; do
-            gdal_calc.py --calc 'A*0.1*10' --outfile $outdir/$f -A MECSat/$f --type Float32
+            gdal_calc.py --calc 'A*0.1*10*2' --outfile $outdir/$f -A MECSat/$f --type Float32
             gdalcopyproj.py ${date1}.tiff $outdir/$f
         done
 
