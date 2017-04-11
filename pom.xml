@@ -109,6 +109,7 @@
                 <argument>755</argument>
                 <argument>/application/gdal/gdal_calc.py</argument>
                 <argument>/application/gdal/gdalcopyproj.py</argument>
+                <argument>/application/micmac/remove_median.py</argument>
                 <argument>/application/micmac/run.sh</argument>
                 <argument>/application/tio/run.sh</argument>
                 <argument>/application/tio/ffmpeg</argument>
