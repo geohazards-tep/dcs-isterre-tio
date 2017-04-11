@@ -3,7 +3,7 @@
 # do not let errors run away
 set -e
 
-export PATH=/application/gdal:/usr/local/gdal-t2/bin:$PATH
+export PATH=/application/micmac:/application/gdal:/usr/local/gdal-t2/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/gdal-t2/lib:$LD_LIBRARY_PATH
 export GDAL_DATA=/usr/local/gdal-t2/share/gdal
 
@@ -46,6 +46,9 @@ ciop-log "INFO" "ROI is '$roi'"
 # Cloud level threshold
 cloud_thres=$(ciop-getparam cloud_thres)
 
+# Do we remove median term from pairs?
+rm_median=$(ciop-getparam rm_median)
+
 # switch to TMPDIR
 ciop-log "INFO" "Change dir to '$TMPDIR'"
 cd $TMPDIR
@@ -82,6 +85,7 @@ while read ref; do
 
     img_mean=$(gdalinfo -stats ${date}.tiff | grep 'STATISTICS_MEAN=' | cut -d= -f2)
     cloud_mean=$(gdalinfo -stats ${date}_clouds.tiff | grep 'STATISTICS_MEAN=' | cut -d= -f2)
+    ciop-log "INFO" "Cloud mask mean for ${date}: $cloud_mean (threshold: $cloud_thres)"
     if [ $(echo "$img_mean > 0 && $cloud_mean < $cloud_thres"|bc) -eq 1 ]; then
         dates="$dates $date"
     fi
@@ -112,6 +116,9 @@ for date1 in $dates; do
         mkdir $outdir
         for f in Px1_Num5_DeZoom1_LeChantier.tif Px2_Num5_DeZoom1_LeChantier.tif; do
             gdal_calc.py --calc 'A*0.1*10*2' --outfile $outdir/$f -A MECSat/$f --type Float32
+            if [ "x$rm_median" = "xyes" ]; then
+              remove_median.py $outdir/$f
+            fi
             gdalcopyproj.py ${date1}.tiff $outdir/$f
         done
 
