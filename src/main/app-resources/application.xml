@@ -5,6 +5,7 @@
       <streamingExecutable>/application/micmac/run.sh</streamingExecutable>
       <defaultParameters>
         <parameter id="roi" title="Region of interest" abstract="Must be inside products" scope="runtime" type="BoundingBoxData">5.668,44.936,5.71,44.964</parameter>
+        <parameter id="cloud_thres" title="Cloud level threshold" abstract="If a cloud mask has a mean value over threshold, it is ignored" scope="runtime">1200</parameter>
       </defaultParameters>
       <defaultJobconf>
         <property id="ciop.job.max.tasks">1</property>
@@ -14,7 +15,6 @@
     <jobTemplate id="job_tio">
       <streamingExecutable>/application/tio/run.sh</streamingExecutable>
       <defaultParameters>
-        <parameter id="cloud_thres" title="Cloud level threshold" abstract="If a cloud mask has a mean value over threshold, it is ignored" scope="runtime">1200</parameter>
         <parameter id="smoothing_coefficient" title="Smoothing coefficient" abstract="threshold = 0.0001" scope="runtime">0.003</parameter>
         <parameter id="rms_misclosure_threshold" title="RMS misclosure threshold" abstract="in rad?" scope="runtime">1.2</parameter>
         <parameter id="weighting_res_scaling_val" title="Scaling value for weighting residuals" abstract="1 / (res**2 + val**2)" scope="runtime">2</parameter>
