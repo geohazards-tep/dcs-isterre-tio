@@ -14,6 +14,7 @@
     <jobTemplate id="job_tio">
       <streamingExecutable>/application/tio/run.sh</streamingExecutable>
       <defaultParameters>
+        <parameter id="cloud_thres" title="Cloud level threshold" abstract="If a cloud mask has a mean value over threshold, it is ignored" scope="runtime">1200</parameter>
         <parameter id="smoothing_coefficient" title="Smoothing coefficient" abstract="threshold = 0.0001" scope="runtime">0.003</parameter>
         <parameter id="rms_misclosure_threshold" title="RMS misclosure threshold" abstract="in rad?" scope="runtime">1.2</parameter>
         <parameter id="weighting_res_scaling_val" title="Scaling value for weighting residuals" abstract="1 / (res**2 + val**2)" scope="runtime">2</parameter>
@@ -32,9 +33,6 @@
       <sources>
         <source id="input_ref" abstract="References to catalogue entries" title="References to catalogue entries" refid="string:list" scope="runtime"/>
       </sources>
-      <parameters>
-        <parameter id="cloud_thres" title="Cloud level threshold" abstract="If a cloud mask has a mean value over threshold, it is ignored" scope="runtime">1200</parameter>
-      </parameters>
     </node>
     <node id="node_tio_ew">
       <job id="job_tio"/>
