@@ -6,6 +6,7 @@
       <defaultParameters>
         <parameter id="roi" title="Region of interest" abstract="Must be inside products" scope="runtime" type="BoundingBoxData">5.668,44.936,5.71,44.964</parameter>
         <parameter id="cloud_thres" title="Cloud level threshold" abstract="If a cloud mask has a mean value over threshold, it is ignored" scope="runtime">1200</parameter>
+        <parameter id="max_pairs_per_date" title="Max number of pairs per date" abstract="Max number of displacement computed from a single date" scope="runtime">4</parameter>
         <parameter id="rm_median" title="Remove median value" abstract="Substract the median value from each displacement map" scope="runtime">
           <options>
             <option>yes</option>

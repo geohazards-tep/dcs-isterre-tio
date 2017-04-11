@@ -46,6 +46,9 @@ ciop-log "INFO" "ROI is '$roi'"
 # Cloud level threshold
 cloud_thres=$(ciop-getparam cloud_thres)
 
+# Get the maximum number of pairs we generate for a specific date
+max_pairs_per_date=$(ciop-getparam max_pairs_per_date)
+
 # Do we remove median term from pairs?
 rm_median=$(ciop-getparam rm_median)
 
@@ -102,7 +105,7 @@ for date1 in $dates; do
         if [ "$date1" -ge "$date2" ]; then
             continue
         fi
-        if [ $count -ge 4 ]; then
+        if [ $count -ge $max_pairs_per_date ]; then
             continue
         fi
 
