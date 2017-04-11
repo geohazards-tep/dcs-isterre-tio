@@ -115,7 +115,7 @@ for date1 in $dates; do
         outdir="$TMPDIR/Out_${date1_dashed}_${date1_dashed}_B03_${date2_dashed}_${date2_dashed}_B03"
         mkdir $outdir
         for f in Px1_Num5_DeZoom1_LeChantier.tif Px2_Num5_DeZoom1_LeChantier.tif; do
-            gdal_calc.py --calc 'A*0.1*10*2' --outfile $outdir/$f -A MECSat/$f --type Float32
+            gdal_calc.py --calc 'A*0.1*10' --outfile $outdir/$f -A MECSat/$f --type Float32
             if [ "x$rm_median" = "xyes" ]; then
               remove_median.py $outdir/$f
             fi
