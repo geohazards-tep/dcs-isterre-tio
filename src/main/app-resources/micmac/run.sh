@@ -109,14 +109,20 @@ for date1 in $dates; do
             continue
         fi
 
+
         ciop-log "INFO" "Processing $date1-$date2 pair"
         /home/mvolat/micmac/bin/mm3d MICMAC /application/micmac/ParamSatDequant.xml WorkDir=./ +DirMEC=MEC/ +Im1=${date1}.tiff +Im2=${date2}.tiff +Masq=
 
+
         ciop-log "INFO" "Prepare publish directory for $date1-$date2 pair"
+        # Let's use the same name as MPIC for directories and files
+        # MPIC use dates with dash (-) separator
         date1_dashed="$(echo $date1|cut -c1-4)-$(echo $date1|cut -c5-6)-$(echo $date1|cut -c7-8)"
         date2_dashed="$(echo $date2|cut -c1-4)-$(echo $date2|cut -c5-6)-$(echo $date2|cut -c7-8)"
         outdir="$TMPDIR/Out_${date1_dashed}_${date1_dashed}_B03_${date2_dashed}_${date2_dashed}_B03"
+        # Create directory
         mkdir $outdir
+        # Copy displacement images
         for f in Px1_Num5_DeZoom1_LeChantier.tif Px2_Num5_DeZoom1_LeChantier.tif; do
             gdal_calc.py --calc 'A*0.1*10' --outfile $outdir/$f -A MECSat/$f --type Float32
             if [ "x$rm_median" = "xyes" ]; then
@@ -124,6 +130,10 @@ for date1 in $dates; do
             fi
             gdalcopyproj.py ${date1}.tiff $outdir/$f
         done
+        # Copy correlation coeff image
+        mv MECSat/Correl_LeChantier_Num_5.tif $outdir
+        gdalcopyproj.py ${date1}.tiff $outdir/Correl_LeChantier_Num_5.tif
+        
 
         ciop-log "INFO" "Publish $(basename $outdir)"
         ciop-publish -r $outdir
