@@ -92,7 +92,7 @@ cd ..
 # Create input files
 ciop-log "INFO" "Create invers_pixel input files"
 
-pairs=$(ls -1 LN_DATA/*.r4 | sed 's/\.r4//' | xargs -L1 basename)
+pairs=$(ls -1 LN_DATA/*.r4 | grep -v CC | sed 's/\.r4//' | xargs -L1 basename)
 dates=$(echo "$pairs" | tr - \\n | sort -u)
 
 # create liste_image_inv file
