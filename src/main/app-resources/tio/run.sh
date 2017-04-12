@@ -217,6 +217,8 @@ gdal_translate -q \
         -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" \
         RMSpixel_dates.vrt \
         RMSpixel_dates_${direction}.tiff
+# copy georeferencing
+gdalcopyproj.py depl_cumule_${direction}.tiff RMSpixel_dates_${direction}.tiff
 
 # create vrt for RMSpixel files per pair
 ciop-log "INFO" "Reformat output: create VRT file for RMSpixel per pair"
@@ -259,17 +261,24 @@ gdal_translate -q \
         -co "INTERLEAVE=BAND" -co "COMPRESS=DEFLATE" -co "PREDICTOR=3" \
         RMSpixel_pairs.vrt \
         RMSpixel_pairs_${direction}.tiff
+# copy georeferencing
+gdalcopyproj.py depl_cumule_${direction}.tiff RMSpixel_pairs_${direction}.tiff
 
 # quicklook
 ciop-log "INFO" "Create quicklooks"
-# image must be reprojected in wgs84 (even if display will be webmercator)
-gdalwarp -q -t_srs "+proj=longlat +ellps=WGS84" -r cubic \
-        depl_cumule_${direction}.tiff \
-        quicklook_depl_cumule_${direction}.tiff
-cp depl_cumule_${direction}.tiff.aux.xml quicklook_depl_cumule_${direction}.tiff.aux.xml
-# create animation
-ts2apng.py quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.png
-rm quicklook_depl_cumule_${direction}.tiff quicklook_depl_cumule_${direction}.tiff.aux.xml
+for f in depl_cumule_${direction} RMSpixel_dates_${direction} RMSpixel_pairs_${direction}
+do
+    # image must be reprojected in wgs84 (even if display will be webmercator)
+    gdalwarp -q -t_srs "+proj=longlat +ellps=WGS84" -r cubic \
+        ${f}.tiff \
+        quicklook_${f}.tiff
+    if [ -e ${f}.tiff.aux.xml ]; then
+      cp ${f}.tiff.aux.xml quicklook_${f}.tiff.aux.xml
+    fi
+    # create animation
+    ts2apng.py quicklook_${f}.tiff quicklook_${f}.png
+    rm quicklook_${f}.tiff quicklook_${f}.tiff.aux.xml
+done
 
 # Publish results
 ciop-log "INFO" "Publishing result files"
@@ -280,7 +289,10 @@ ciop-publish -m $TMPDIR/RMSpixel_dates_${direction}.tiff
 ciop-publish -m $TMPDIR/RMSpixel_pairs_${direction}.tiff
 #ciop-publish -m $TMPDIR/RMSpixel_pairs_${direction}.tiff.aux.xml
 ciop-log "INFO" "Publishing png files"
-ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.png
-ciop-publish -m $TMPDIR/quicklook_depl_cumule_${direction}.pngw
+for f in quicklook_depl_cumule_${direction}.png quicklook_RMSpixel_dates_${direction}.png quicklook_RMSpixel_pairs_${direction}.png
+do
+    ciop-publish -m $TMPDIR/${f}
+    ciop-publish -m $TMPDIR/${f}w
+done
 
 exit 0
