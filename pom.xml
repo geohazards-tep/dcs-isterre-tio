@@ -189,6 +189,7 @@
             <require>gdal-t2</require>
             <require>gdal-python</require>
             <require>lapack</require>
+            <require>nsbas_invers_optic</require>
             <require>python-matplotlib</require>
           </requires>
         </configuration>

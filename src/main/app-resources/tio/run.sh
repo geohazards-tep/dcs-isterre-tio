@@ -151,7 +151,7 @@ EOF
 
 # run invers_pixel
 ciop-log "INFO" "Calling invers_pixel"
-/home/mvolat/nsbas-invers_optic/bin/invers_pixel invers_pixel_param || exit $ERR_INVERS_PIXEL
+invers_pixel invers_pixel_param || exit $ERR_INVERS_PIXEL
 
 # copy georeferencing from one input, generate aux.xml files
 gdalcopyproj.py LN_DATA/$(printf $pairs|head -n1).r4 depl_cumule
