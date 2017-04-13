@@ -1,5 +1,5 @@
 Name:		nsbas_invers_optic
-Version:	0.1853
+Version:	0.1829
 Release:	1%{?dist}
 Summary:	The invers_pixel program from NSBAS customized for optical data
 
