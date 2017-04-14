@@ -68,7 +68,6 @@ while read ref; do
     date=$(opensearch-client $ref startdate | cut -c 1-10 | tr -d "-")
     img_dl=$(ciop-copy -o $TMPDIR $(opensearch-client $ref enclosure))
     if [ -z "$date" -o -z "$img_dl" ]; then
-        #exit $ERR_CATALOG;
         continue
     fi
 
@@ -79,7 +78,6 @@ while read ref; do
     if [ -n "$(basename $img_dl | grep S2A_OPER_PRD_MSIL1C_PDMC_)" ]; then
         safedir=$(ls -d $img_dl/*.SAFE)
 
-        # TODO: check that ROI is in product
         ciop-log "INFO" "Cropping $safedir to ROI"
         gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B03.jp2 ${date}.tiff || crop_failed=1
         gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B09.jp2 ${date}_clouds.tiff || crop_failed=1
@@ -90,16 +88,22 @@ while read ref; do
         rm -Rf $img_dl
         continue
     fi
-
+    
+    # Get image and cloud mask mean value to check wheter we keep the date or not
     img_mean=$(gdalinfo -stats ${date}.tiff | grep 'STATISTICS_MEAN=' | cut -d= -f2)
     cloud_mean=$(gdalinfo -stats ${date}_clouds.tiff | grep 'STATISTICS_MEAN=' | cut -d= -f2)
     ciop-log "INFO" "Cloud mask mean for ${date}: $cloud_mean (threshold: $cloud_thres)"
     if [ $(echo "$img_mean > 0 && $cloud_mean < $cloud_thres"|bc) -eq 1 ]; then
         dates="$dates $date"
+    else
+        rm -f ${date}.tiff ${date}_clouds.tiff
     fi
 
+    # Do not keep original product, they take a lot of space
 	rm -Rf $img_dl
 done
+
+# Ok, sort dates
 dates=$(echo $dates | tr ' ' '\\n' | sort -nu | tr '\\n' ' ')
 ciop-log "INFO" "Available acquisitions: $dates"
 
