@@ -79,8 +79,8 @@ while read ref; do
         safedir=$(ls -d $img_dl/*.SAFE)
 
         ciop-log "INFO" "Cropping $safedir to ROI"
-        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B03.jp2 ${date}.tiff || crop_failed=1
-        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B09.jp2 ${date}_clouds.tiff || crop_failed=1
+        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' -r cubic $safedir/GRANULE/S2A*/IMG_DATA/*_B03.jp2 ${date}.tiff || crop_failed=1
+        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' -r cubic $safedir/GRANULE/S2A*/IMG_DATA/*_B09.jp2 ${date}_clouds.tiff || crop_failed=1
     else
         exit $ERR_SENSOR_NOT_SUPPORTED
     fi
