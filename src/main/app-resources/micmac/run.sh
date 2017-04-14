@@ -111,7 +111,7 @@ for date1 in $dates; do
 
 
         ciop-log "INFO" "Processing $date1-$date2 pair"
-        /home/mvolat/micmac/bin/mm3d MICMAC /application/micmac/ParamSatDequant.xml WorkDir=./ +DirMEC=MEC/ +Im1=${date1}.tiff +Im2=${date2}.tiff +Masq=
+        mm3d MICMAC /application/micmac/ParamSatDequant.xml WorkDir=./ +DirMEC=MEC/ +Im1=${date1}.tiff +Im2=${date2}.tiff +Masq=
 
 
         ciop-log "INFO" "Prepare publish directory for $date1-$date2 pair"
