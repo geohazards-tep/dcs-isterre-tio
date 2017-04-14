@@ -75,15 +75,20 @@ while read ref; do
     # What happens here: we crop/mosaic the inputs
     # into the desired frame. There may be overwrite.
 
+    crop_failed=0
     if [ -n "$(basename $img_dl | grep S2A_OPER_PRD_MSIL1C_PDMC_)" ]; then
         safedir=$(ls -d $img_dl/*.SAFE)
 
         # TODO: check that ROI is in product
         ciop-log "INFO" "Cropping $safedir to ROI"
-        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B03.jp2 ${date}.tiff
-        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B09.jp2 ${date}_clouds.tiff
+        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B03.jp2 ${date}.tiff || crop_failed=1
+        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' $safedir/GRANULE/S2A*/IMG_DATA/*_B09.jp2 ${date}_clouds.tiff || crop_failed=1
     else
         exit $ERR_SENSOR_NOT_SUPPORTED
+    fi
+    if [ $crop_failed -eq 1 ]; then
+        rm -Rf $img_dl
+        continue
     fi
 
     img_mean=$(gdalinfo -stats ${date}.tiff | grep 'STATISTICS_MEAN=' | cut -d= -f2)
