@@ -75,15 +75,16 @@ while read ref; do
     # into the desired frame. There may be overwrite.
 
     crop_failed=0
-    if [ -n "$(basename $img_dl | grep S2A_OPER_PRD_MSIL1C_PDMC_)" ]; then
+    case "$(basename $img_dl)" in
+    S2A_OPER_PRD_MSIL1C_PDMC_*|S2A_OPER_PRD_MSIL1C_PDMC_*|S2A_MSIL1C_*|S2B_MSIL1C_*)
         safedir=$(ls -d $img_dl/*.SAFE)
-
         ciop-log "INFO" "Cropping $safedir to ROI"
-        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' -r cubic $safedir/GRANULE/S2A*/IMG_DATA/*_B03.jp2 ${date}.tiff || crop_failed=1
-        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' -r cubic $safedir/GRANULE/S2A*/IMG_DATA/*_B09.jp2 ${date}_clouds.tiff || crop_failed=1
-    else
+        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' -r cubic $safedir/GRANULE/*/IMG_DATA/*_B03.jp2 ${date}.tiff || crop_failed=1
+        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' -r cubic $safedir/GRANULE/*/IMG_DATA/*_B09.jp2 ${date}_clouds.tiff || crop_failed=1
+        ;;
+    *)
         exit $ERR_SENSOR_NOT_SUPPORTED
-    fi
+    esac
     if [ $crop_failed -eq 1 ]; then
         rm -Rf $img_dl
         continue
