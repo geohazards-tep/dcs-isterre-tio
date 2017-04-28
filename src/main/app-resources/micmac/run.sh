@@ -66,7 +66,7 @@ while read ref; do
 	# Fetch image
 	ciop-log "INFO" "Process reference '$ref'"
     date=$(opensearch-client $ref startdate | cut -c 1-10 | tr -d "-")
-    img_dl=$(ciop-copy -o $TMPDIR $(opensearch-client $ref enclosure))
+    img_dl=$(ciop-copy -o $TMPDIR "$(opensearch-client $ref enclosure)")
     if [ -z "$date" -o -z "$img_dl" ]; then
         continue
     fi
