@@ -76,6 +76,14 @@ while read ref; do
 
     crop_failed=0
     case "$(basename $img_dl)" in
+    LC8*) # LandSat-8
+        tbz2=$(basename $img_dl)
+        name=${tbz2%.*}
+        tar -xjf $tbz2 ${name}_B8.TIF ${name}_B9.TIF
+        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' -r cubic ${name}_B8.TIF ${date}.tiff || crop_failed=1
+        gdalwarp -q -overwrite -te $roi -te_srs 'urn:ogc:def:crs:OGC:1.3:CRS84' -r cubic ${name}_B9.TIF ${date}.tiff || crop_failed=1
+        rm ${name}_B8.TIF ${name}_B9.TIF
+        ;;
     S2A_OPER_PRD_MSIL1C_PDMC_*|S2A_OPER_PRD_MSIL1C_PDMC_*|S2A_MSIL1C_*|S2B_MSIL1C_*)
         safedir=$(ls -d $img_dl/*.SAFE)
         ciop-log "INFO" "Cropping $safedir to ROI"
