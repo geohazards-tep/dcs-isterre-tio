@@ -192,6 +192,7 @@
             <require>micmac</require>
             <require>nsbas_invers_optic</require>
             <require>python-matplotlib</require>
+            <require>proj-devel</require><!-- due to compil bug in gdal-t2 -->
           </requires>
         </configuration>
       </plugin>
