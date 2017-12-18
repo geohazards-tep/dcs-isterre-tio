@@ -2,14 +2,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.terradue.ciop.app</groupId>
+  <groupId>fr.isterre</groupId>
   <artifactId>dcs-isterre-tio</artifactId>
   <!--<packaging>rpm</packaging>-->
   <name>dcs-isterre-tio</name>
-  <description>Developer Cloud Sandbox for ...</description>
+  <description>The TIO service combine correlation maps from the MicMac software and perform a time serie analysis</description>
   <version>0.1.0</version>
 
-  <!-- <scm /> -->
+  <scm>
+    <connection>scm:git:ssh://git@github.com/geohazards-tep/dcs-isterre-tio</connection>
+    <developerConnection>scm:git:ssh://git@github.com/geohazards-tep/dcs-isterre-tio</developerConnection>
+    <url>https://github.com/geohazards-tep/dcs-isterre-tio</url>
+<tag>HEAD</tag>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

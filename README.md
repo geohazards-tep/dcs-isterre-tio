@@ -1,7 +1,7 @@
 dcs-isterre-tio
 ===============
 
-The TIO service combine correlation maps provided by the MPIC service
+The TIO service combine correlation maps from the MicMac software
 and perform a time serie analysis using the methods described in 
 Bontemps & al[1].
 
